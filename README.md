@@ -27,33 +27,8 @@ After installing the node, you can use it like any other node. n8n displays the 
 
 ### Product
 
-- **Create**: Create a new product
-- **Get**: Retrieve a product by ID
 - **Get Many**: Retrieve multiple products
-- **Update**: Update an existing product
-- **Delete**: Delete a product
-
-### Customer
-
-- **Create**: Create a new customer
-- **Get**: Retrieve a customer by ID
-- **Get Many**: Retrieve multiple customers
-- **Update**: Update an existing customer
-- **Delete**: Delete a customer
-
-### Order
-
-- **Get**: Retrieve an order by ID
-- **Get Many**: Retrieve multiple orders
-- **Update**: Update an order
-
-### Category
-
-- **Create**: Create a new category
-- **Get**: Retrieve a category by ID
-- **Get Many**: Retrieve multiple categories
-- **Update**: Update an existing category
-- **Delete**: Delete a category
+- **Search** Search multiple products
 
 ## Credentials
 
