@@ -1,256 +1,124 @@
 # n8n-nodes-ikas
 
-![IKAS Logo](https://ikas.com/assets/logo.svg)
+This is an n8n community node. It lets you use IKAS e-commerce platform in your n8n workflows.
 
-This is an n8n community node that integrates with the [IKAS](https://ikas.com) e-commerce platform. It allows you to automate workflows with IKAS stores by managing products through the [IKAS Admin API](https://ikas.dev/docs/api/admin-api).
+IKAS is a comprehensive e-commerce platform that provides merchants with tools to create, manage, and grow their online stores. This node enables seamless integration with IKAS's GraphQL API for automating e-commerce operations.
 
 [n8n](https://n8n.io/) is a [fair-code licensed](https://docs.n8n.io/reference/license/) workflow automation platform.
 
-## 📋 Table of Contents
+[Installation](#installation)  
+[Operations](#operations)  
+[Credentials](#credentials)  
+[Compatibility](#compatibility)  
+[Usage](#usage)  
+[Resources](#resources)  
+[Version history](#version-history)
 
-- [Installation](#-installation)
-- [Features](#-features)
-- [Authentication](#-authentication)
-- [Operations](#-operations)
-- [Requirements](#-requirements)
-- [Usage Examples](#-usage-examples)
-- [Development](#-development)
-- [Contributing](#-contributing)
-- [License](#-license)
-- [Resources](#-resources)
+## Installation
 
-## 🚀 Installation
+Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes/installation/) in the n8n community nodes documentation.
 
-### Via n8n Community Nodes
+Use the package name: `n8n-nodes-ikas`
 
-1. Go to **Settings > Community Nodes** in your n8n instance
-2. Select **Install**
-3. Enter `n8n-nodes-ikas` in **Enter npm package name**
-4. Agree to the [risks](https://docs.n8n.io/integrations/community-nodes/risks/) of using community nodes
-5. Select **Install**
+## Operations
 
-### Manual Installation
+This node supports the following operations:
 
-```bash
-npm install n8n-nodes-ikas
-```
+### Products
 
-After installing the node, you can use it like any other node. n8n displays the node in search results in the **Nodes** panel.
+- **Get Many**: Retrieve multiple products from your IKAS store
+- **Search**: Search products with advanced filters and pagination
+- **Create**: Create new products in your store
+- **Update**: Update existing product information
 
-## ✨ Features
+### Orders
 
-### Current Features
+- **Get Many**: Retrieve orders from your IKAS store with filtering options
 
-- **Product Management**: Create, update, search, and retrieve products
-- **GraphQL Integration**: Full GraphQL API support for IKAS platform
-- **OAuth2 Authentication**: Secure OAuth2 authentication with automatic token management
-- **Advanced Search**: Filter products by ID, SKU, barcode, and text search
-- **Simple Products**: Complete support for simple product creation and management
-- **Flexible Pricing**: Support for sell price, buy price, and discount pricing
-- **Product Types**: Support for Physical, Digital, Bundle, and Membership products
+### Available GraphQL Operations
 
-### Upcoming Features
+- **Queries**:
+  - `GetProducts` - Fetch product data
+  - `SearchProducts` - Advanced product search with filters
+  - `GetOrders` - Retrieve order information
+- **Mutations**:
+  - `SaveProduct` - Create or update products
 
-- **Variable Products**: Multi-variant product support (under development)
-- **Order Management**: Create, and update orders
-- **Customer Management**: Customer CRUD operations
-- **Category Management**: Product category operations
-- **Inventory Management**: Stock level tracking and updates
+## Credentials
 
-## 🔐 Authentication
-
-The node uses OAuth2 authentication with automatic token management.
-
-### OAuth2 Configuration
-
-Configure your credentials with:
-
-- **Store Name**: Your IKAS store name (without .myikas.com)
-- **Client ID**: Client ID from your IKAS Private App
-- **Client Secret**: Client Secret from your IKAS Private App
-
-### Getting Your Credentials
-
-1. Log in to your IKAS store admin panel
-2. Navigate to the developer/API section
-3. Create a new Private App
-4. Note your store domain, Client ID, and Client Secret
-5. The node will automatically handle token generation and refresh
-
-For detailed authentication setup, see the [IKAS API Authentication Guide](https://ikas.dev/docs/api/getting-started/authentication).
-
-## 🔧 Operations
-
-### Product Operations
-
-#### **Get Many**
-
-- **Description**: Retrieve multiple products from your store
-- **Use Case**: Bulk product data export, inventory analysis
-- **Returns**: Array of product objects with full details
-
-#### **Search**
-
-- **Description**: Search products with advanced filters
-- **Parameters**:
-  - Search Query (text search across name, description)
-  - Product IDs (comma-separated list)
-  - SKU List (comma-separated list)
-  - Barcode List (comma-separated list)
-  - Pagination (limit, page, or return all)
-- **Use Case**: Find specific products, inventory lookup, data synchronization
-
-#### **Create**
-
-- **Description**: Create a new product in your store
-- **Required Fields**:
-  - Product Name
-  - Product Type (Physical, Digital, Bundle, Membership)
-- **Optional Fields**:
-  - Description, Short Description
-  - Weight, Max Quantity Per Cart
-  - Brand ID, Category IDs, Tag IDs
-  - Sales Channel IDs
-  - SKU, Pricing (Sell Price, Buy Price, Discount Price)
-- **Product Structure**: Currently supports Simple Products only
-
-#### **Update**
-
-- **Description**: Update an existing product
-- **Required Fields**:
-  - Product ID (for identification)
-  - Product Name
-  - Product Type
-- **Note**: Same optional fields as Create operation
-
-## 📋 Requirements
-
-### System Requirements
-
-- **Node.js**: >= 22.16
-- **n8n**: >= 1.0.0
-- **IKAS Store**: Active IKAS e-commerce store with API access
-
-### API Requirements
-
-- **IKAS Private App**: Required for API access
-- **API Permissions**: Ensure your app has product management permissions
-- **GraphQL Endpoint**: Uses `https://api.myikas.com/api/v1/admin/graphql`
-
-## 📖 Usage Examples
-
-### Basic Product Creation
-
-```json
-{
-	"Resource": "Product",
-	"Operation": "Create",
-	"Product Name": "Premium Coffee Beans",
-	"Product Type": "PHYSICAL",
-	"Description": "High-quality arabica coffee beans",
-	"Price": 29.99,
-	"Buy Price": 15.0,
-	"SKU": "COFFEE-001"
-}
-```
-
-### Advanced Product Search
-
-```json
-{
-	"Resource": "Product",
-	"Operation": "Search",
-	"Search Query": "coffee",
-	"SKU List": "COFFEE-001,COFFEE-002",
-	"Return All": false,
-	"Limit": 50,
-	"Page": 1
-}
-```
-
-### Workflow Example: Daily Inventory Sync
-
-1. **Schedule Trigger**: Run daily at 6 AM
-2. **IKAS Node**: Search products with low stock
-3. **Filter Node**: Filter products below threshold
-4. **IKAS Node**: Update product information
-5. **Email Node**: Send inventory report
-
-### Project Structure
-
-```
-n8n-nodes-ikas/
-├── credentials/
-│   └── IkasApi.credentials.ts          # OAuth2 authentication
-├── nodes/
-│   └── Ikas/
-│       ├── Ikas.node.ts                # Main node implementation
-│       ├── GenericFunctions.ts         # Helper functions
-│       ├── graphql/
-│       │   ├── queries/
-│       │   │   ├── GetProducts.ts      # Get products query
-│       │   │   └── SearchProducts.ts   # Search products query
-│       │   └── mutations/
-│       │       └── SaveProduct.ts      # Create/update product mutation
-│       └── ikas-icon.svg               # Node icon
-├── package.json                        # Project configuration
-└── tsconfig.json                       # TypeScript configuration
-```
-
-### GraphQL Schema
-
-The node uses GraphQL for all API interactions. Key schemas:
-
-- **ProductInput**: Input schema for creating/updating products
-- **SearchProductsInput**: Input schema for product search
-- **Product**: Output schema for product data
-
-See the [IKAS API Type Definitions](https://ikas.dev/docs/api/type-definitions/admin-api/inputs/product-input) for complete schema documentation.
-
-## 🤝 Contributing
-
-We welcome contributions! Here's how you can help:
+To use this node, you need to authenticate with IKAS using OAuth2 credentials. Here's how to set it up:
 
 ### Prerequisites
 
-- Installed n8n instance
-- Node.js >= 22.16
+1. You must have an IKAS store
+2. Create a Private App in your IKAS admin panel to get API credentials
 
-### Reporting Issues
+### Authentication Setup
 
-Please use GitHub Issues to report bugs or request features:
+1. In your IKAS admin panel, navigate to Apps & Integrations
+2. Create a new Private App
+3. Note down your:
+   - **Store Name** (your store subdomain without .myikas.com)
+   - **Client ID**
+   - **Client Secret**
 
-1. Check existing issues first
-2. Provide detailed reproduction steps
-3. Include n8n version, node version, and error messages
-4. Add relevant workflow examples
+### Credential Configuration
 
-## 📄 License
+When setting up the IKAS API credentials in n8n:
 
-[MIT License](LICENSE.md) - see the LICENSE.md file for details.
+- **Store Name**: Your IKAS store name (e.g., "mystore" for mystore.myikas.com)
+- **Client ID**: The Client ID from your Private App
+- **Client Secret**: The Client Secret from your Private App
 
-## 📚 Resources
+The node will automatically handle OAuth2 authentication and session token management.
 
-### Documentation
+## Compatibility
 
-- [IKAS API Documentation](https://ikas.dev/docs/api/admin-api)
+- **Minimum n8n version**: 1.0.0
+- **Node version**: 1.0
+- **Tested with**: n8n 1.x
+- **Node.js**: >=22.16
+
+This node uses the IKAS GraphQL API v1 and should be compatible with all current IKAS store configurations.
+
+## Usage
+
+### Basic Product Operations
+
+**Get Products**: Simply select "Product" as resource and "Get Many" as operation. The node will fetch products from your store.
+
+**Search Products**: Use advanced filtering options to find specific products based on various criteria like name, category, price, etc.
+
+**Create/Update Products**: Provide product data in the input to create new products or update existing ones.
+
+### Working with Orders
+
+Select "Order" as resource and "Get Many" as operation to retrieve order data. You can filter orders by date, status, and other criteria.
+
+### GraphQL Integration
+
+This node leverages IKAS's GraphQL API, providing efficient data fetching and manipulation. All operations are optimized for performance and follow GraphQL best practices.
+
+### Tips
+
+- Use the search functionality for better performance when working with large product catalogs
+- The node handles pagination automatically for large result sets
+- Session tokens are managed automatically - no need for manual token refresh
+
+## Resources
+
+- [n8n community nodes documentation](https://docs.n8n.io/integrations/#community-nodes)
+- [IKAS API Documentation](https://ikas.dev/docs/intro)
 - [IKAS Authentication Guide](https://ikas.dev/docs/api/getting-started/authentication)
-- [n8n Community Nodes Documentation](https://docs.n8n.io/integrations/community-nodes/)
-- [n8n Node Development Guide](https://docs.n8n.io/integrations/creating-nodes/)
-
-### Links
-
-- [IKAS Website](https://ikas.com/)
 - [IKAS Developer Portal](https://ikas.dev/)
-- [n8n Website](https://n8n.io/)
-- [GitHub Repository](https://github.com/efekarakanli/n8n-nodes-ikas)
 
-### Community
+## Version history
 
-- [n8n Community Forum](https://community.n8n.io/)
+### 0.1.0
 
----
-
-**Made with ❤️ for the n8n and IKAS communities**
-
-_For questions or support, please open an issue on GitHub or reach out through the n8n community forum._
+- Initial release
+- Support for Product operations (Get Many, Search, Create, Update)
+- Support for Order operations (Get Many)
+- OAuth2 authentication with automatic session management
+- GraphQL API integration
+- Full TypeScript support

@@ -9,14 +9,14 @@
     "integration"
   ],
   "license": "MIT",
-  "homepage": "https://github.com/efekarakanli/n8n-nodes-ikas",
+  "homepage": "https://github.com/actuallyzefe/n8n-ikas",
   "author": {
     "name": "Efe Karakanlı",
-    "email": "your-email@example.com"
+    "email": "zefek10@gmail.com"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/efekarakanli/n8n-nodes-ikas.git"
+    "url": "https://github.com/actuallyzefe/n8n-ikas.git"
   },
   "engines": {
     "node": ">=22.16"
@@ -26,9 +26,9 @@
     "build": "npx rimraf dist && tsc && gulp build:icons",
     "dev": "tsc --watch",
     "format": "prettier nodes credentials --write",
-    "lint": "eslint nodes credentials",
-    "lintfix": "eslint nodes credentials --fix",
-    "prepublishOnly": "npm run build && npm run lint -c .eslintrc.prepublish.js nodes credentials package.json"
+    "lint": "eslint nodes/**/*.ts credentials/**/*.ts",
+    "lintfix": "eslint nodes/**/*.ts credentials/**/*.ts --fix",
+    "prepublishOnly": "npm run build && npm run lint -c .eslintrc.prepublish.js nodes/**/*.ts credentials/**/*.ts package.json"
   },
   "files": [
     "dist"

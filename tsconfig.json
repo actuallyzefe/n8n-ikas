@@ -1,30 +1,24 @@
 {
-	"compilerOptions": {
-		"module": "commonjs",
-		"target": "es2022",
-		"lib": ["es2022"],
-		"declaration": true,
-		"outDir": "./dist",
-		"strict": true,
-		"noImplicitAny": true,
-		"experimentalDecorators": true,
-		"emitDecoratorMetadata": true,
-		"skipLibCheck": true,
-		"forceConsistentCasingInFileNames": true,
-		"esModuleInterop": true,
-		"allowSyntheticDefaultImports": true,
-		"resolveJsonModule": true,
-		"moduleResolution": "node",
-		"sourceMap": true,
-		"inlineSourceMap": false,
-		"typeRoots": ["./node_modules/@types"]
-	},
-	"include": [
-		"credentials/**/*",
-		"nodes/**/*"
-	],
-	"exclude": [
-		"node_modules/**/*",
-		"dist/**/*"
-	]
-} 
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2022",
+    "lib": ["es2022"],
+    "declaration": true,
+    "outDir": "./dist",
+    "strict": true,
+    "noImplicitAny": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "inlineSourceMap": false,
+    "typeRoots": ["./node_modules/@types"]
+  },
+  "include": ["credentials/**/*", "nodes/**/*", "nodes/**/*.json", "package.json"],
+  "exclude": ["node_modules/**/*", "dist/**/*"]
+}
