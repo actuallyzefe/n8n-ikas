@@ -27,22 +27,53 @@ This node supports the following operations:
 ### Products
 
 - **Get Many**: Retrieve multiple products from your IKAS store
-- **Search**: Search products with advanced filters and pagination
-- **Create**: Create new products in your store
-- **Update**: Update existing product information
+- **Search**: Search products with advanced filters and pagination including:
+  - Search by name, description, or other text fields
+  - Filter by product IDs, SKUs, or barcodes
+  - Pagination support with customizable page size
+- **Create**: Create new products in your store with:
+  - Simple product structure support
+  - Automatic variant creation
+  - Stock location assignment
+  - Pricing configuration (sell price, buy price, discount price)
+- **Update**: Update existing product information including all product fields
 
 ### Orders
 
-- **Get Many**: Retrieve orders from your IKAS store with filtering options
+- **Get Many**: Retrieve orders from your IKAS store with advanced filtering:
+  - Filter by customer email or customer ID
+  - Filter by order number or sales channel
+  - Filter by order status (Created, Confirmed, Fulfilled, etc.)
+  - Filter by payment status (Paid, Pending, Refunded, etc.)
+  - Filter by package status (Preparing, Shipped, Delivered, etc.)
+- **Fulfill**: Fulfill order line items with:
+  - Multiple line item fulfillment
+  - Quantity specification per line item
+  - Optional marking as ready for shipment
+  - Customer notification settings
+  - Tracking information (tracking number, cargo company, barcode, etc.)
+- **Update Package Status**: Update order package statuses with:
+  - Multiple package status updates in one operation
+  - Comprehensive status options (Fulfilled, Shipped, Delivered, Cancelled, etc.)
+  - Tracking information updates
+  - Error message handling
+
+### Stock Management
+
+- **Stock Location Retrieval**: Get stock locations by name or filters
+- **Stock Assignment**: Automatically assign stock to locations during product creation
 
 ### Available GraphQL Operations
 
 - **Queries**:
-  - `GetProducts` - Fetch product data
-  - `SearchProducts` - Advanced product search with filters
-  - `GetOrders` - Retrieve order information
+  - `GetProducts` - Fetch product data with full product information
+  - `SearchProducts` - Advanced product search with filters and pagination
+  - `GetOrders` - Retrieve order information with comprehensive filtering
 - **Mutations**:
-  - `SaveProduct` - Create or update products
+
+  - `SaveProduct` - Create or update products with full product structure
+  - `FulfillOrder` - Fulfill order line items with tracking
+  - `UpdateOrderPackageStatus` - Update package statuses with tracking info
 
 ## Credentials
 
@@ -83,27 +114,53 @@ This node uses the IKAS GraphQL API v1 and should be compatible with all current
 
 ## Usage
 
-### Basic Product Operations
+### Product Operations
 
-**Get Products**: Simply select "Product" as resource and "Get Many" as operation. The node will fetch products from your store.
+**Get Products**: Select "Product" as resource and "Get Many" as operation to fetch all products from your store with complete product information.
 
-**Search Products**: Use advanced filtering options to find specific products based on various criteria like name, category, price, etc.
+**Search Products**: Use advanced filtering to find specific products:
 
-**Create/Update Products**: Provide product data in the input to create new products or update existing ones.
+- Search by text query across product names and descriptions
+- Filter by specific product IDs, SKUs, or barcodes (comma-separated lists)
+- Use pagination controls to manage large result sets
+- Return all results or limit to specific page sizes
 
-### Working with Orders
+**Create Products**: Create new products with comprehensive configuration:
 
-Select "Order" as resource and "Get Many" as operation to retrieve order data. You can filter orders by date, status, and other criteria.
+- Set product name, type (Physical, Digital, Bundle, Membership), and structure
+- Configure pricing (sell price, buy price, discount price)
+- Add descriptions, weight, and quantity limits
+- Assign to sales channels
+- Set initial stock counts and assign to stock locations
+- Add additional attributes, translations, and metadata
 
-### GraphQL Integration
+**Update Products**: Modify existing products using the same configuration options as creation, plus the ability to update all product fields.
 
-This node leverages IKAS's GraphQL API, providing efficient data fetching and manipulation. All operations are optimized for performance and follow GraphQL best practices.
+### Order Management
 
-### Tips
+**Get Orders**: Retrieve orders with powerful filtering capabilities:
 
-- Use the search functionality for better performance when working with large product catalogs
-- The node handles pagination automatically for large result sets
-- Session tokens are managed automatically - no need for manual token refresh
+- Filter by customer information (email, customer ID)
+- Filter by order details (order number, sales channel)
+- Filter by order status (Created, Confirmed, Fulfilled, Cancelled, etc.)
+- Filter by payment status (Paid, Pending, Refunded, Partially Paid, etc.)
+- Filter by package status (Preparing, Shipped, Delivered, Returned, etc.)
+
+**Fulfill Orders**: Process order fulfillment with detailed control:
+
+- Fulfill specific line items with custom quantities
+- Add tracking information (tracking number, cargo company, barcode)
+- Configure shipment notifications to customers
+- Mark orders as ready for shipment
+- Link to source packages for inventory tracking
+
+**Update Package Status**: Manage package lifecycle with comprehensive status updates:
+
+- Update multiple packages in a single operation
+- Set detailed package statuses (Fulfilled, Ready for Shipment, Shipped, Delivered, Cancelled, Error, etc.)
+- Add or update tracking information per package
+- Handle error states with custom error messages
+- Include source IDs for external system integration
 
 ## Resources
 
