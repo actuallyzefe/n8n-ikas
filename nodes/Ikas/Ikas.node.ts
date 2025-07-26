@@ -337,18 +337,11 @@ export class Ikas implements INodeType {
 				},
 				options: [
 					{
-						displayName: 'Tracking Number',
-						name: 'trackingNumber',
+						displayName: 'Barcode',
+						name: 'barcode',
 						type: 'string',
 						default: '',
-						description: 'Tracking number for the shipment',
-					},
-					{
-						displayName: 'Tracking Link',
-						name: 'trackingLink',
-						type: 'string',
-						default: '',
-						description: 'URL link to track the shipment',
+						description: 'Barcode for the shipment',
 					},
 					{
 						displayName: 'Cargo Company',
@@ -365,18 +358,25 @@ export class Ikas implements INodeType {
 						description: 'ID of the cargo/shipping company',
 					},
 					{
-						displayName: 'Barcode',
-						name: 'barcode',
-						type: 'string',
-						default: '',
-						description: 'Barcode for the shipment',
-					},
-					{
 						displayName: 'Send Tracking Notification',
 						name: 'isSendNotification',
 						type: 'boolean',
 						default: false,
 						description: 'Whether to send tracking notification to customer',
+					},
+					{
+						displayName: 'Tracking Link',
+						name: 'trackingLink',
+						type: 'string',
+						default: '',
+						description: 'URL link to track the shipment',
+					},
+					{
+						displayName: 'Tracking Number',
+						name: 'trackingNumber',
+						type: 'string',
+						default: '',
+						description: 'Tracking number for the shipment',
 					},
 				],
 			},
@@ -416,47 +416,19 @@ export class Ikas implements INodeType {
 						displayName: 'Packages',
 						values: [
 							{
+								displayName: 'Error Message',
+								name: 'errorMessage',
+								type: 'string',
+								default: '',
+								description: 'Error message (optional, typically used with ERROR status)',
+							},
+							{
 								displayName: 'Package ID',
 								name: 'packageId',
 								type: 'string',
 								default: '',
 								description: 'ID of the package to update',
 								required: true,
-							},
-							{
-								displayName: 'Status',
-								name: 'status',
-								type: 'options',
-								default: 'FULFILLED',
-								description: 'New status for the package',
-								options: [
-									{ name: 'Cancelled', value: 'CANCELLED' },
-									{ name: 'Cancel Rejected', value: 'CANCEL_REJECTED' },
-									{ name: 'Cancel Requested', value: 'CANCEL_REQUESTED' },
-									{ name: 'Delivered', value: 'DELIVERED' },
-									{ name: 'Error', value: 'ERROR' },
-									{ name: 'Fulfilled', value: 'FULFILLED' },
-									{ name: 'Ready for Pick Up', value: 'READY_FOR_PICK_UP' },
-									{ name: 'Ready for Shipment', value: 'READY_FOR_SHIPMENT' },
-									{ name: 'Refunded', value: 'REFUNDED' },
-									{ name: 'Refund Rejected', value: 'REFUND_REJECTED' },
-									{ name: 'Refund Requested', value: 'REFUND_REQUESTED' },
-									{ name: 'Refund Request Accepted', value: 'REFUND_REQUEST_ACCEPTED' },
-									{ name: 'Unable to Deliver', value: 'UNABLE_TO_DELIVER' },
-								],
-								required: true,
-							},
-							{
-								displayName: 'Error Message',
-								name: 'errorMessage',
-								type: 'string',
-								default: '',
-								description: 'Error message (optional, typically used with ERROR status)',
-								displayOptions: {
-									show: {
-										status: ['ERROR'],
-									},
-								},
 							},
 							{
 								displayName: 'Source ID',
@@ -466,25 +438,80 @@ export class Ikas implements INodeType {
 								description: 'Source ID for the update (optional)',
 							},
 							{
+								displayName: 'Status',
+								name: 'status',
+								type: 'options',
+								default: 'FULFILLED',
+								description: 'New status for the package',
+								options: [
+									{
+										name: 'Cancel Rejected',
+										value: 'CANCEL_REJECTED',
+									},
+									{
+										name: 'Cancel Requested',
+										value: 'CANCEL_REQUESTED',
+									},
+									{
+										name: 'Cancelled',
+										value: 'CANCELLED',
+									},
+									{
+										name: 'Delivered',
+										value: 'DELIVERED',
+									},
+									{
+										name: 'Error',
+										value: 'ERROR',
+									},
+									{
+										name: 'Fulfilled',
+										value: 'FULFILLED',
+									},
+									{
+										name: 'Ready for Pick Up',
+										value: 'READY_FOR_PICK_UP',
+									},
+									{
+										name: 'Ready for Shipment',
+										value: 'READY_FOR_SHIPMENT',
+									},
+									{
+										name: 'Refund Rejected',
+										value: 'REFUND_REJECTED',
+									},
+									{
+										name: 'Refund Request Accepted',
+										value: 'REFUND_REQUEST_ACCEPTED',
+									},
+									{
+										name: 'Refund Requested',
+										value: 'REFUND_REQUESTED',
+									},
+									{
+										name: 'Refunded',
+										value: 'REFUNDED',
+									},
+									{
+										name: 'Unable to Deliver',
+										value: 'UNABLE_TO_DELIVER',
+									},
+								],
+								required: true,
+							},
+							{
 								displayName: 'Tracking Information',
 								name: 'trackingInfo',
 								type: 'collection',
-								placeholder: 'Add Tracking Info',
 								default: {},
+								placeholder: 'Add Tracking Info',
 								options: [
 									{
-										displayName: 'Tracking Number',
-										name: 'trackingNumber',
+										displayName: 'Barcode',
+										name: 'barcode',
 										type: 'string',
 										default: '',
-										description: 'Tracking number for the shipment',
-									},
-									{
-										displayName: 'Tracking Link',
-										name: 'trackingLink',
-										type: 'string',
-										default: '',
-										description: 'URL link to track the shipment',
+										description: 'Barcode for the shipment',
 									},
 									{
 										displayName: 'Cargo Company',
@@ -501,18 +528,25 @@ export class Ikas implements INodeType {
 										description: 'ID of the cargo/shipping company',
 									},
 									{
-										displayName: 'Barcode',
-										name: 'barcode',
-										type: 'string',
-										default: '',
-										description: 'Barcode for the shipment',
-									},
-									{
 										displayName: 'Send Tracking Notification',
 										name: 'isSendNotification',
 										type: 'boolean',
 										default: false,
 										description: 'Whether to send tracking notification to customer',
+									},
+									{
+										displayName: 'Tracking Link',
+										name: 'trackingLink',
+										type: 'string',
+										default: '',
+										description: 'URL link to track the shipment',
+									},
+									{
+										displayName: 'Tracking Number',
+										name: 'trackingNumber',
+										type: 'string',
+										default: '',
+										description: 'Tracking number for the shipment',
 									},
 								],
 							},
@@ -1195,7 +1229,10 @@ export class Ikas implements INodeType {
 									});
 
 									if (stockLocations.length === 0) {
-										throw new Error(`No stock location found matching name: ${stockLocationName}`);
+										throw new NodeOperationError(
+											this.getNode(),
+											`No stock location found matching name: ${stockLocationName}`,
+										);
 									}
 
 									// Use the first matching stock location
