@@ -264,21 +264,114 @@ export class Ikas implements INodeType {
 				},
 				options: [
 					{
-						name: 'Simple',
-						value: 'SIMPLE',
+						name: 'Physical',
+						value: 'PHYSICAL',
 					},
 					{
-						name: 'Variable',
-						value: 'VARIABLE',
+						name: 'Digital',
+						value: 'DIGITAL',
 					},
 					{
-						name: 'Grouped',
-						value: 'GROUPED',
+						name: 'Bundle',
+						value: 'BUNDLE',
+					},
+					{
+						name: 'Membership',
+						value: 'MEMBERSHIP',
 					},
 				],
-				default: 'SIMPLE',
+				default: 'PHYSICAL',
 				description: 'Type of the product',
 				required: true,
+			},
+			{
+				displayName: 'Product Structure',
+				name: 'productStructure',
+				type: 'options',
+				displayOptions: {
+					show: {
+						resource: ['product'],
+						operation: ['create', 'update'],
+					},
+				},
+				options: [
+					{
+						name: 'Simple Product',
+						value: 'simple',
+					},
+				],
+				default: 'simple',
+				description:
+					'Currently only simple products are supported. Variable products are under development.',
+				required: true,
+			},
+			{
+				displayName: 'Price',
+				name: 'price',
+				type: 'number',
+				displayOptions: {
+					show: {
+						resource: ['product'],
+						operation: ['create', 'update'],
+						productStructure: ['simple'],
+					},
+				},
+				default: 0,
+				description: 'Selling price for the simple product',
+				typeOptions: {
+					numberPrecision: 2,
+					minValue: 0,
+				},
+			},
+			{
+				displayName: 'Buy Price',
+				name: 'buyPrice',
+				type: 'number',
+				displayOptions: {
+					show: {
+						resource: ['product'],
+						operation: ['create', 'update'],
+						productStructure: ['simple'],
+					},
+				},
+				default: 0,
+				description: 'Cost/buy price for the simple product',
+				typeOptions: {
+					numberPrecision: 2,
+					minValue: 0,
+				},
+			},
+			{
+				displayName: 'Discount Price',
+				name: 'discountPrice',
+				type: 'number',
+				displayOptions: {
+					show: {
+						resource: ['product'],
+						operation: ['create', 'update'],
+						productStructure: ['simple'],
+					},
+				},
+				default: null,
+				description: 'Discount price for the simple product (optional)',
+				typeOptions: {
+					numberPrecision: 2,
+					minValue: 0,
+				},
+			},
+			{
+				displayName: 'SKU',
+				name: 'sku',
+				type: 'string',
+				displayOptions: {
+					show: {
+						resource: ['product'],
+						operation: ['create', 'update'],
+						productStructure: ['simple'],
+					},
+				},
+				default: '',
+				description: 'SKU for the simple product (optional)',
 			},
 			{
 				displayName: 'Description',
@@ -384,20 +477,7 @@ export class Ikas implements INodeType {
 				default: '',
 				description: 'Comma-separated list of sales channel IDs',
 			},
-			{
-				displayName: 'Variants',
-				name: 'variants',
-				type: 'json',
-				displayOptions: {
-					show: {
-						resource: ['product'],
-						operation: ['create', 'update'],
-					},
-				},
-				default: '[]',
-				description:
-					'JSON array of product variants. Each variant should include sku, variantValues, prices, stocks, etc.',
-			},
+
 			{
 				displayName: 'Additional Options',
 				name: 'additionalFields',
@@ -618,25 +698,32 @@ export class Ikas implements INodeType {
 
 						const salesChannelIds = this.getNodeParameter('salesChannelIds', i) as string;
 						if (salesChannelIds) {
-							productInput.salesChannelIds = salesChannelIds
-								.split(',')
-								.map((id) => id.trim())
-								.filter((id) => id);
+							productInput.salesChannelIds = salesChannelIds;
 						}
 
-						// Handle variants (JSON array)
-						const variantsJson = this.getNodeParameter('variants', i) as string;
-						if (variantsJson) {
-							try {
-								productInput.variants = JSON.parse(variantsJson);
-							} catch (error) {
-								throw new NodeOperationError(
-									this.getNode(),
-									`Invalid JSON in variants field: ${(error as Error).message}`,
-									{ itemIndex: i },
-								);
-							}
+						// Generate a default variant for simple products
+						const price = this.getNodeParameter('price', i) as number;
+						const buyPrice = this.getNodeParameter('buyPrice', i) as number;
+						const discountPrice = this.getNodeParameter('discountPrice', i) as number;
+						const sku = this.getNodeParameter('sku', i) as string;
+
+						const defaultVariant: any = {
+							isActive: true,
+							prices: [
+								{
+									sellPrice: price || 0,
+									buyPrice: buyPrice || 0,
+									discountPrice: discountPrice || null,
+								},
+							],
+						};
+
+						// Add SKU if provided
+						if (sku) {
+							defaultVariant.sku = sku;
 						}
+
+						productInput.variants = [defaultVariant];
 
 						// Handle additional fields
 						const additionalFields = this.getNodeParameter('additionalFields', i) as any;

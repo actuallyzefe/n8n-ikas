@@ -1,4 +1,4 @@
-export const SaveProductMutation = `mutation SaveProduct($input: SaveProductInput!) {
+export const SaveProductMutation = `mutation SaveProduct($input: ProductInput!) {
   saveProduct(input: $input) {
     id
     name
@@ -20,7 +20,6 @@ export const SaveProductMutation = `mutation SaveProduct($input: SaveProductInpu
     hiddenSalesChannelIds
     dynamicPriceListIds
     attributes {
-      id
       value
       imageIds
     }
@@ -42,17 +41,7 @@ export const SaveProductMutation = `mutation SaveProduct($input: SaveProductInpu
     }
     productVariantTypes {
       order
-      variantType {
-        id
-        name
-        selectionType
-        values {
-          id
-          name
-          colorCode
-          thumbnailImageId
-        }
-      }
+      variantTypeId
       variantValueIds
     }
     variants {
@@ -60,17 +49,15 @@ export const SaveProductMutation = `mutation SaveProduct($input: SaveProductInpu
       sku
       barcodeList
       isActive
-      variantValues {
+      variantValueIds {
         variantTypeId
         variantValueId
       }
       attributes {
-        id
         value
         imageIds
       }
       images {
-        id
         fileName
         order
         isMain
@@ -101,9 +88,7 @@ export const SaveProductMutation = `mutation SaveProduct($input: SaveProductInpu
       description
     }
     metaData {
-      title
       description
-      keywords
     }
     createdAt
     updatedAt
