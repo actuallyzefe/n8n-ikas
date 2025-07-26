@@ -16,12 +16,6 @@ export class IkasApi implements ICredentialType {
 
 	icon = 'file:ikas-icon.svg' as const;
 
-	httpRequestNode = {
-		name: 'IKAS',
-		docsUrl: 'https://ikas.dev/docs/intro',
-		apiBaseUrlPlaceholder: 'https://api.myikas.com/api/v1/admin/graphql',
-	};
-
 	properties: INodeProperties[] = [
 		{
 			displayName: 'Session Token',

@@ -1,84 +1,256 @@
 # n8n-nodes-ikas
 
-This is an n8n community node that integrates with the [Ikas](https://ikas.com) e-commerce platform. It allows you to automate workflows with Ikas stores by managing products, customers, orders, and categories.
+![IKAS Logo](https://ikas.com/assets/logo.svg)
+
+This is an n8n community node that integrates with the [IKAS](https://ikas.com) e-commerce platform. It allows you to automate workflows with IKAS stores by managing products through the [IKAS Admin API](https://ikas.dev/docs/api/admin-api).
 
 [n8n](https://n8n.io/) is a [fair-code licensed](https://docs.n8n.io/reference/license/) workflow automation platform.
 
-[Installation](#installation)  
-[Operations](#operations)  
-[Credentials](#credentials)  
-[Compatibility](#compatibility)  
-[Usage](#usage)  
-[Resources](#resources)
+## 📋 Table of Contents
 
-## Installation
+- [Installation](#-installation)
+- [Features](#-features)
+- [Authentication](#-authentication)
+- [Operations](#-operations)
+- [Requirements](#-requirements)
+- [Usage Examples](#-usage-examples)
+- [Development](#-development)
+- [Contributing](#-contributing)
+- [License](#-license)
+- [Resources](#-resources)
 
-Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes/installation/) in the n8n community nodes documentation.
+## 🚀 Installation
 
-1. Go to **Settings > Community Nodes**.
-2. Select **Install**.
-3. Enter `n8n-nodes-ikas` in **Enter npm package name**.
-4. Agree to the [risks](https://docs.n8n.io/integrations/community-nodes/risks/) of using community nodes: select **I understand the risks of installing unverified code from a public source**.
-5. Select **Install**.
+### Via n8n Community Nodes
+
+1. Go to **Settings > Community Nodes** in your n8n instance
+2. Select **Install**
+3. Enter `n8n-nodes-ikas` in **Enter npm package name**
+4. Agree to the [risks](https://docs.n8n.io/integrations/community-nodes/risks/) of using community nodes
+5. Select **Install**
+
+### Manual Installation
+
+```bash
+npm install n8n-nodes-ikas
+```
 
 After installing the node, you can use it like any other node. n8n displays the node in search results in the **Nodes** panel.
 
-## Operations
+## ✨ Features
 
-### Product
+### Current Features
 
-- **Get Many**: Retrieve multiple products
-- **Search** Search multiple products
+- **Product Management**: Create, update, search, and retrieve products
+- **GraphQL Integration**: Full GraphQL API support for IKAS platform
+- **OAuth2 Authentication**: Secure OAuth2 authentication with automatic token management
+- **Advanced Search**: Filter products by ID, SKU, barcode, and text search
+- **Simple Products**: Complete support for simple product creation and management
+- **Flexible Pricing**: Support for sell price, buy price, and discount pricing
+- **Product Types**: Support for Physical, Digital, Bundle, and Membership products
 
-## Credentials
+### Upcoming Features
 
-You need to set up Ikas API credentials to use this node:
+- **Variable Products**: Multi-variant product support (under development)
+- **Order Management**: Create, and update orders
+- **Customer Management**: Customer CRUD operations
+- **Category Management**: Product category operations
+- **Inventory Management**: Stock level tracking and updates
 
-1. **API Key**: Your Ikas API key from the developer dashboard
-2. **Store Domain**: Your Ikas store domain (without .ikas.com)
+## 🔐 Authentication
 
-To get your API credentials:
+The node uses OAuth2 authentication with automatic token management.
 
-1. Log in to your Ikas store admin panel
-2. Navigate to the developer section
-3. Generate an API key
-4. Note your store domain
+### OAuth2 Configuration
 
-## Compatibility
+Configure your credentials with:
 
-Tested with n8n version 1.0+
+- **Store Name**: Your IKAS store name (without .myikas.com)
+- **Client ID**: Client ID from your IKAS Private App
+- **Client Secret**: Client Secret from your IKAS Private App
 
-## Usage
+### Getting Your Credentials
 
-### Basic Example
+1. Log in to your IKAS store admin panel
+2. Navigate to the developer/API section
+3. Create a new Private App
+4. Note your store domain, Client ID, and Client Secret
+5. The node will automatically handle token generation and refresh
 
-Here's a simple workflow that creates a product in your Ikas store:
+For detailed authentication setup, see the [IKAS API Authentication Guide](https://ikas.dev/docs/api/getting-started/authentication).
 
-1. Add a **Manual Trigger** node
-2. Add the **Ikas** node
-3. Configure the node:
-   - **Resource**: Product
-   - **Operation**: Create
-   - **Product Name**: "My New Product"
-   - **Product Price**: 29.99
-   - **Product SKU**: "PROD-001"
+## 🔧 Operations
 
-### Advanced Example
+### Product Operations
 
-You can create more complex workflows by combining multiple operations:
+#### **Get Many**
 
-1. **Schedule Trigger**: Run daily at 9 AM
-2. **Ikas**: Get all new orders
-3. **Filter**: Filter orders by status
-4. **Ikas**: Update customer information
-5. **Send Email**: Notify team about new orders
+- **Description**: Retrieve multiple products from your store
+- **Use Case**: Bulk product data export, inventory analysis
+- **Returns**: Array of product objects with full details
 
-## Resources
+#### **Search**
 
-- [n8n community nodes documentation](https://docs.n8n.io/integrations/community-nodes/)
-- [Ikas API documentation](https://ikas.dev/)
-- [Ikas website](https://ikas.com/)
+- **Description**: Search products with advanced filters
+- **Parameters**:
+  - Search Query (text search across name, description)
+  - Product IDs (comma-separated list)
+  - SKU List (comma-separated list)
+  - Barcode List (comma-separated list)
+  - Pagination (limit, page, or return all)
+- **Use Case**: Find specific products, inventory lookup, data synchronization
 
-## License
+#### **Create**
 
-[MIT](https://github.com/efekarakanli/n8n-nodes-ikas/blob/main/LICENSE.md)
+- **Description**: Create a new product in your store
+- **Required Fields**:
+  - Product Name
+  - Product Type (Physical, Digital, Bundle, Membership)
+- **Optional Fields**:
+  - Description, Short Description
+  - Weight, Max Quantity Per Cart
+  - Brand ID, Category IDs, Tag IDs
+  - Sales Channel IDs
+  - SKU, Pricing (Sell Price, Buy Price, Discount Price)
+- **Product Structure**: Currently supports Simple Products only
+
+#### **Update**
+
+- **Description**: Update an existing product
+- **Required Fields**:
+  - Product ID (for identification)
+  - Product Name
+  - Product Type
+- **Note**: Same optional fields as Create operation
+
+## 📋 Requirements
+
+### System Requirements
+
+- **Node.js**: >= 22.16
+- **n8n**: >= 1.0.0
+- **IKAS Store**: Active IKAS e-commerce store with API access
+
+### API Requirements
+
+- **IKAS Private App**: Required for API access
+- **API Permissions**: Ensure your app has product management permissions
+- **GraphQL Endpoint**: Uses `https://api.myikas.com/api/v1/admin/graphql`
+
+## 📖 Usage Examples
+
+### Basic Product Creation
+
+```json
+{
+	"Resource": "Product",
+	"Operation": "Create",
+	"Product Name": "Premium Coffee Beans",
+	"Product Type": "PHYSICAL",
+	"Description": "High-quality arabica coffee beans",
+	"Price": 29.99,
+	"Buy Price": 15.0,
+	"SKU": "COFFEE-001"
+}
+```
+
+### Advanced Product Search
+
+```json
+{
+	"Resource": "Product",
+	"Operation": "Search",
+	"Search Query": "coffee",
+	"SKU List": "COFFEE-001,COFFEE-002",
+	"Return All": false,
+	"Limit": 50,
+	"Page": 1
+}
+```
+
+### Workflow Example: Daily Inventory Sync
+
+1. **Schedule Trigger**: Run daily at 6 AM
+2. **IKAS Node**: Search products with low stock
+3. **Filter Node**: Filter products below threshold
+4. **IKAS Node**: Update product information
+5. **Email Node**: Send inventory report
+
+### Project Structure
+
+```
+n8n-nodes-ikas/
+├── credentials/
+│   └── IkasApi.credentials.ts          # OAuth2 authentication
+├── nodes/
+│   └── Ikas/
+│       ├── Ikas.node.ts                # Main node implementation
+│       ├── GenericFunctions.ts         # Helper functions
+│       ├── graphql/
+│       │   ├── queries/
+│       │   │   ├── GetProducts.ts      # Get products query
+│       │   │   └── SearchProducts.ts   # Search products query
+│       │   └── mutations/
+│       │       └── SaveProduct.ts      # Create/update product mutation
+│       └── ikas-icon.svg               # Node icon
+├── package.json                        # Project configuration
+└── tsconfig.json                       # TypeScript configuration
+```
+
+### GraphQL Schema
+
+The node uses GraphQL for all API interactions. Key schemas:
+
+- **ProductInput**: Input schema for creating/updating products
+- **SearchProductsInput**: Input schema for product search
+- **Product**: Output schema for product data
+
+See the [IKAS API Type Definitions](https://ikas.dev/docs/api/type-definitions/admin-api/inputs/product-input) for complete schema documentation.
+
+## 🤝 Contributing
+
+We welcome contributions! Here's how you can help:
+
+### Prerequisites
+
+- Installed n8n instance
+- Node.js >= 22.16
+
+### Reporting Issues
+
+Please use GitHub Issues to report bugs or request features:
+
+1. Check existing issues first
+2. Provide detailed reproduction steps
+3. Include n8n version, node version, and error messages
+4. Add relevant workflow examples
+
+## 📄 License
+
+[MIT License](LICENSE.md) - see the LICENSE.md file for details.
+
+## 📚 Resources
+
+### Documentation
+
+- [IKAS API Documentation](https://ikas.dev/docs/api/admin-api)
+- [IKAS Authentication Guide](https://ikas.dev/docs/api/getting-started/authentication)
+- [n8n Community Nodes Documentation](https://docs.n8n.io/integrations/community-nodes/)
+- [n8n Node Development Guide](https://docs.n8n.io/integrations/creating-nodes/)
+
+### Links
+
+- [IKAS Website](https://ikas.com/)
+- [IKAS Developer Portal](https://ikas.dev/)
+- [n8n Website](https://n8n.io/)
+- [GitHub Repository](https://github.com/efekarakanli/n8n-nodes-ikas)
+
+### Community
+
+- [n8n Community Forum](https://community.n8n.io/)
+
+---
+
+**Made with ❤️ for the n8n and IKAS communities**
+
+_For questions or support, please open an issue on GitHub or reach out through the n8n community forum._

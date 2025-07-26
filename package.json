@@ -36,8 +36,7 @@
   "n8n": {
     "n8nNodesApiVersion": 1,
     "credentials": [
-      "dist/credentials/IkasApi.credentials.js",
-      "dist/credentials/IkasAccessTokenApi.credentials.js"
+      "dist/credentials/IkasApi.credentials.js"
     ],
     "nodes": [
       "dist/nodes/Ikas/Ikas.node.js"

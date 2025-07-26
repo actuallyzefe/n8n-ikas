@@ -9,6 +9,7 @@ import { NodeConnectionType, NodeOperationError } from 'n8n-workflow';
 import { ikasGraphQLRequest } from './GenericFunctions';
 import { SearchProductsQuery } from './graphql/queries/SearchProducts';
 import { GetProductsQuery } from './graphql/queries/GetProducts';
+import { GetOrdersQuery } from './graphql/queries/GetOrders';
 import { SaveProductMutation } from './graphql/mutations/SaveProduct';
 
 export class Ikas implements INodeType {
@@ -28,22 +29,8 @@ export class Ikas implements INodeType {
 		outputs: [NodeConnectionType.Main],
 		credentials: [
 			{
-				name: 'ikasAccessTokenApi',
-				required: true,
-				displayOptions: {
-					show: {
-						authentication: ['accessToken'],
-					},
-				},
-			},
-			{
 				name: 'ikasApi',
 				required: true,
-				displayOptions: {
-					show: {
-						authentication: ['oAuth2'],
-					},
-				},
 			},
 		],
 		requestDefaults: {
@@ -54,22 +41,6 @@ export class Ikas implements INodeType {
 		},
 		properties: [
 			{
-				displayName: 'Authentication',
-				name: 'authentication',
-				type: 'options',
-				options: [
-					{
-						name: 'Access Token',
-						value: 'accessToken',
-					},
-					{
-						name: 'OAuth2',
-						value: 'oAuth2',
-					},
-				],
-				default: 'accessToken',
-			},
-			{
 				displayName: 'Resource',
 				name: 'resource',
 				type: 'options',
@@ -79,6 +50,11 @@ export class Ikas implements INodeType {
 						name: 'Product',
 						value: 'product',
 						description: 'Work with products in your IKAS store',
+					},
+					{
+						name: 'Order',
+						value: 'order',
+						description: 'Work with orders in your IKAS store',
 					},
 				],
 				default: 'product',
@@ -121,6 +97,118 @@ export class Ikas implements INodeType {
 					},
 				],
 				default: 'getMany',
+			},
+			// Order Operations
+			{
+				displayName: 'Operation',
+				name: 'operation',
+				type: 'options',
+				noDataExpression: true,
+				displayOptions: {
+					show: {
+						resource: ['order'],
+					},
+				},
+				options: [
+					{
+						name: 'Get Many',
+						value: 'getMany',
+						description: 'Get multiple orders',
+						action: 'Get many orders',
+					},
+				],
+				default: 'getMany',
+			},
+			// Order Parameters
+			{
+				displayName: 'Additional Filters',
+				name: 'additionalFilters',
+				type: 'collection',
+				placeholder: 'Add Filter',
+				default: {},
+				displayOptions: {
+					show: {
+						resource: ['order'],
+						operation: ['getMany'],
+					},
+				},
+				options: [
+					{
+						displayName: 'Order Status',
+						name: 'status',
+						type: 'multiOptions',
+						default: [],
+						description: 'Filter orders by status',
+						options: [
+							{ name: 'Created', value: 'CREATED' },
+							{ name: 'Confirmed', value: 'CONFIRMED' },
+							{ name: 'Cancelled', value: 'CANCELLED' },
+							{ name: 'Refunded', value: 'REFUNDED' },
+							{ name: 'Fulfilled', value: 'FULFILLED' },
+							{ name: 'Partially Fulfilled', value: 'PARTIALLY_FULFILLED' },
+						],
+					},
+					{
+						displayName: 'Payment Status',
+						name: 'paymentStatus',
+						type: 'multiOptions',
+						default: [],
+						description: 'Filter orders by payment status',
+						options: [
+							{ name: 'Pending', value: 'PENDING' },
+							{ name: 'Paid', value: 'PAID' },
+							{ name: 'Partially Paid', value: 'PARTIALLY_PAID' },
+							{ name: 'Refunded', value: 'REFUNDED' },
+							{ name: 'Partially Refunded', value: 'PARTIALLY_REFUNDED' },
+							{ name: 'Failed', value: 'FAILED' },
+							{ name: 'Cancelled', value: 'CANCELLED' },
+						],
+					},
+					{
+						displayName: 'Package Status',
+						name: 'packageStatus',
+						type: 'multiOptions',
+						default: [],
+						description: 'Filter orders by package status',
+						options: [
+							{ name: 'Preparing', value: 'PREPARING' },
+							{ name: 'Ready for Shipment', value: 'READY_FOR_SHIPMENT' },
+							{ name: 'Shipped', value: 'SHIPPED' },
+							{ name: 'Delivered', value: 'DELIVERED' },
+							{ name: 'Returned', value: 'RETURNED' },
+							{ name: 'Cancelled', value: 'CANCELLED' },
+							{ name: 'Refunded', value: 'REFUNDED' },
+						],
+					},
+					{
+						displayName: 'Customer ID',
+						name: 'customerId',
+						type: 'string',
+						default: '',
+						description: 'Filter by customer ID',
+					},
+					{
+						displayName: 'Customer Email',
+						name: 'customerEmail',
+						type: 'string',
+						default: '',
+						description: 'Filter by customer email',
+					},
+					{
+						displayName: 'Order Number',
+						name: 'orderNumber',
+						type: 'string',
+						default: '',
+						description: 'Filter by order number',
+					},
+					{
+						displayName: 'Sales Channel ID',
+						name: 'salesChannelId',
+						type: 'string',
+						default: '',
+						description: 'Filter by sales channel ID',
+					},
+				],
 			},
 			// Product Search Parameters
 			{
@@ -775,6 +863,76 @@ export class Ikas implements INodeType {
 							{ itemIndex: i },
 						);
 					}
+				} else if (resource === 'order') {
+					if (operation === 'getMany') {
+						// Build order filter variables
+						const orderVariables: any = {};
+
+						// Handle additional filters
+						const additionalFilters = this.getNodeParameter('additionalFilters', i) as any;
+						if (additionalFilters && Object.keys(additionalFilters).length > 0) {
+							// Order status filter - using proper filter format
+							if (additionalFilters.status && additionalFilters.status.length > 0) {
+								orderVariables.status = {
+									in: additionalFilters.status,
+								};
+							}
+
+							// Payment status filter - using proper filter format
+							if (additionalFilters.paymentStatus && additionalFilters.paymentStatus.length > 0) {
+								orderVariables.orderPaymentStatus = {
+									in: additionalFilters.paymentStatus,
+								};
+							}
+
+							// Package status filter - using proper filter format
+							if (additionalFilters.packageStatus && additionalFilters.packageStatus.length > 0) {
+								orderVariables.orderPackageStatus = {
+									in: additionalFilters.packageStatus,
+								};
+							}
+
+							// Customer filters - using proper filter format
+							if (additionalFilters.customerId) {
+								orderVariables.customerId = {
+									eq: additionalFilters.customerId,
+								};
+							}
+							if (additionalFilters.customerEmail) {
+								orderVariables.customerEmail = {
+									eq: additionalFilters.customerEmail,
+								};
+							}
+
+							// Order number filter - using proper filter format
+							if (additionalFilters.orderNumber) {
+								orderVariables.orderNumber = {
+									eq: additionalFilters.orderNumber,
+								};
+							}
+
+							// Sales channel filter - using proper filter format
+							if (additionalFilters.salesChannelId) {
+								orderVariables.salesChannelId = {
+									eq: additionalFilters.salesChannelId,
+								};
+							}
+						}
+
+						const response = await ikasGraphQLRequest.call(this, GetOrdersQuery, orderVariables);
+
+						responseData = response.data?.listOrder || {};
+
+						this.logger.info(JSON.stringify(responseData, null, 2), {
+							message: 'Orders are here',
+						});
+					} else {
+						throw new NodeOperationError(
+							this.getNode(),
+							`Operation "${operation}" is not yet implemented for resource "${resource}"`,
+							{ itemIndex: i },
+						);
+					}
 				} else {
 					throw new NodeOperationError(
 						this.getNode(),
@@ -783,10 +941,41 @@ export class Ikas implements INodeType {
 					);
 				}
 
+				// Handle different response structures
+				let dataToReturn: any[] = [];
+
+				if (resource === 'order' && operation === 'getMany') {
+					// For orders, extract the data array and include pagination info
+					const orders = responseData.data || [];
+					const paging = {
+						page: responseData.page,
+						limit: responseData.limit,
+						count: responseData.count,
+					};
+
+					dataToReturn = orders.map((order: any) => ({
+						...order,
+						_pagination: paging,
+					}));
+				} else if (resource === 'product' && operation === 'search') {
+					// For product search, handle the search response structure
+					const products = responseData.data || [];
+					const paging = responseData.paging || {};
+
+					dataToReturn = products.map((product: any) => ({
+						...product,
+						_pagination: paging,
+					}));
+				} else if (Array.isArray(responseData)) {
+					// For arrays (like getMany products)
+					dataToReturn = responseData;
+				} else {
+					// For single objects (like create/update operations)
+					dataToReturn = [responseData || {}];
+				}
+
 				const executionData = this.helpers.constructExecutionMetaData(
-					Array.isArray(responseData)
-						? responseData.map((item) => ({ json: item }))
-						: [{ json: responseData || {} }],
+					dataToReturn.map((item) => ({ json: item })),
 					{ itemData: { item: i } },
 				);
 

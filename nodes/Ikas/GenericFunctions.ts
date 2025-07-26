@@ -13,8 +13,7 @@ export async function ikasApiRequest(
 	body: IDataObject = {},
 	query: IDataObject = {},
 ) {
-	const authentication = this.getNodeParameter('authentication', 0) as 'accessToken' | 'oAuth2';
-	const credentialsType = authentication === 'oAuth2' ? 'ikasApi' : 'ikasAccessTokenApi';
+	const credentialsType = 'ikasApi';
 
 	const options: IHttpRequestOptions = {
 		method,
