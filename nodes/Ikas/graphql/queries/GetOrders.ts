@@ -31,6 +31,7 @@ export const GetOrdersQuery = `
 				note
 				isGiftPackage
 				giftPackageNote
+				sourceId
 				customer {
 					id
 					firstName

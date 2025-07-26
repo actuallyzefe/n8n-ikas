@@ -13,6 +13,8 @@ import { GetOrdersQuery } from './graphql/queries/GetOrders';
 import { GetStockLocationsQuery } from './graphql/queries/GetStockLocations';
 import { SaveProductMutation } from './graphql/mutations/SaveProduct';
 import { SaveStockLocationsMutation } from './graphql/mutations/SaveStockLocations';
+import { FulfillOrderMutation } from './graphql/mutations/FulfillOrder';
+import { UpdateOrderPackageStatusMutation } from './graphql/mutations/UpdateOrderPackageStatus';
 
 export class Ikas implements INodeType {
 	description: INodeTypeDescription = {
@@ -118,6 +120,18 @@ export class Ikas implements INodeType {
 						description: 'Get multiple orders',
 						action: 'Get many orders',
 					},
+					{
+						name: 'Fulfill',
+						value: 'fulfill',
+						description: 'Fulfill order lines',
+						action: 'Fulfill an order',
+					},
+					{
+						name: 'Update Package Status',
+						value: 'updatePackageStatus',
+						description: 'Update order package status',
+						action: 'Update package status',
+					},
 				],
 				default: 'getMany',
 			},
@@ -211,6 +225,313 @@ export class Ikas implements INodeType {
 						description: 'Filter by sales channel ID',
 					},
 				],
+			},
+			// Order Fulfill Parameters
+			{
+				displayName: 'Order ID',
+				name: 'orderId',
+				type: 'string',
+				displayOptions: {
+					show: {
+						resource: ['order'],
+						operation: ['fulfill'],
+					},
+				},
+				default: '',
+				description: 'ID of the order to fulfill',
+				required: true,
+			},
+			{
+				displayName: 'Order Line Items',
+				name: 'fulfillLines',
+				type: 'fixedCollection',
+				displayOptions: {
+					show: {
+						resource: ['order'],
+						operation: ['fulfill'],
+					},
+				},
+				default: {},
+				description: 'Order line items to fulfill',
+				typeOptions: {
+					multipleValues: true,
+				},
+				options: [
+					{
+						name: 'lineItems',
+						displayName: 'Line Items',
+						values: [
+							{
+								displayName: 'Order Line Item ID',
+								name: 'orderLineItemId',
+								type: 'string',
+								default: '',
+								description: 'ID of the order line item to fulfill',
+								required: true,
+							},
+							{
+								displayName: 'Quantity',
+								name: 'quantity',
+								type: 'number',
+								default: 1,
+								description: 'Quantity to fulfill',
+								typeOptions: {
+									minValue: 1,
+								},
+								required: true,
+							},
+						],
+					},
+				],
+			},
+			{
+				displayName: 'Mark as Ready for Shipment',
+				name: 'markAsReadyForShipment',
+				type: 'boolean',
+				displayOptions: {
+					show: {
+						resource: ['order'],
+						operation: ['fulfill'],
+					},
+				},
+				default: false,
+				description: 'Whether to mark the order as ready for shipment',
+			},
+			{
+				displayName: 'Send Notification to Customer',
+				name: 'sendNotificationToCustomer',
+				type: 'boolean',
+				displayOptions: {
+					show: {
+						resource: ['order'],
+						operation: ['fulfill'],
+					},
+				},
+				default: false,
+				description: 'Whether to send notification to customer',
+			},
+			{
+				displayName: 'Source Package ID',
+				name: 'sourcePackageId',
+				type: 'string',
+				displayOptions: {
+					show: {
+						resource: ['order'],
+						operation: ['fulfill'],
+					},
+				},
+				default: '',
+				description: 'ID of the source package (optional)',
+			},
+			{
+				displayName: 'Tracking Information',
+				name: 'trackingInfo',
+				type: 'collection',
+				placeholder: 'Add Tracking Info',
+				default: {},
+				displayOptions: {
+					show: {
+						resource: ['order'],
+						operation: ['fulfill'],
+					},
+				},
+				options: [
+					{
+						displayName: 'Tracking Number',
+						name: 'trackingNumber',
+						type: 'string',
+						default: '',
+						description: 'Tracking number for the shipment',
+					},
+					{
+						displayName: 'Tracking Link',
+						name: 'trackingLink',
+						type: 'string',
+						default: '',
+						description: 'URL link to track the shipment',
+					},
+					{
+						displayName: 'Cargo Company',
+						name: 'cargoCompany',
+						type: 'string',
+						default: '',
+						description: 'Name of the cargo/shipping company',
+					},
+					{
+						displayName: 'Cargo Company ID',
+						name: 'cargoCompanyId',
+						type: 'string',
+						default: '',
+						description: 'ID of the cargo/shipping company',
+					},
+					{
+						displayName: 'Barcode',
+						name: 'barcode',
+						type: 'string',
+						default: '',
+						description: 'Barcode for the shipment',
+					},
+					{
+						displayName: 'Send Tracking Notification',
+						name: 'isSendNotification',
+						type: 'boolean',
+						default: false,
+						description: 'Whether to send tracking notification to customer',
+					},
+				],
+			},
+			// Update Package Status Parameters
+			{
+				displayName: 'Order ID',
+				name: 'orderIdForPackageStatus',
+				type: 'string',
+				displayOptions: {
+					show: {
+						resource: ['order'],
+						operation: ['updatePackageStatus'],
+					},
+				},
+				default: '',
+				description: 'ID of the order containing packages to update',
+				required: true,
+			},
+			{
+				displayName: 'Packages',
+				name: 'packageUpdates',
+				type: 'fixedCollection',
+				displayOptions: {
+					show: {
+						resource: ['order'],
+						operation: ['updatePackageStatus'],
+					},
+				},
+				default: {},
+				description: 'Package status updates',
+				typeOptions: {
+					multipleValues: true,
+				},
+				options: [
+					{
+						name: 'packages',
+						displayName: 'Packages',
+						values: [
+							{
+								displayName: 'Package ID',
+								name: 'packageId',
+								type: 'string',
+								default: '',
+								description: 'ID of the package to update',
+								required: true,
+							},
+							{
+								displayName: 'Status',
+								name: 'status',
+								type: 'options',
+								default: 'FULFILLED',
+								description: 'New status for the package',
+								options: [
+									{ name: 'Cancelled', value: 'CANCELLED' },
+									{ name: 'Cancel Rejected', value: 'CANCEL_REJECTED' },
+									{ name: 'Cancel Requested', value: 'CANCEL_REQUESTED' },
+									{ name: 'Delivered', value: 'DELIVERED' },
+									{ name: 'Error', value: 'ERROR' },
+									{ name: 'Fulfilled', value: 'FULFILLED' },
+									{ name: 'Ready for Pick Up', value: 'READY_FOR_PICK_UP' },
+									{ name: 'Ready for Shipment', value: 'READY_FOR_SHIPMENT' },
+									{ name: 'Refunded', value: 'REFUNDED' },
+									{ name: 'Refund Rejected', value: 'REFUND_REJECTED' },
+									{ name: 'Refund Requested', value: 'REFUND_REQUESTED' },
+									{ name: 'Refund Request Accepted', value: 'REFUND_REQUEST_ACCEPTED' },
+									{ name: 'Unable to Deliver', value: 'UNABLE_TO_DELIVER' },
+								],
+								required: true,
+							},
+							{
+								displayName: 'Error Message',
+								name: 'errorMessage',
+								type: 'string',
+								default: '',
+								description: 'Error message (optional, typically used with ERROR status)',
+								displayOptions: {
+									show: {
+										status: ['ERROR'],
+									},
+								},
+							},
+							{
+								displayName: 'Source ID',
+								name: 'sourceId',
+								type: 'string',
+								default: '',
+								description: 'Source ID for the update (optional)',
+							},
+							{
+								displayName: 'Tracking Information',
+								name: 'trackingInfo',
+								type: 'collection',
+								placeholder: 'Add Tracking Info',
+								default: {},
+								options: [
+									{
+										displayName: 'Tracking Number',
+										name: 'trackingNumber',
+										type: 'string',
+										default: '',
+										description: 'Tracking number for the shipment',
+									},
+									{
+										displayName: 'Tracking Link',
+										name: 'trackingLink',
+										type: 'string',
+										default: '',
+										description: 'URL link to track the shipment',
+									},
+									{
+										displayName: 'Cargo Company',
+										name: 'cargoCompany',
+										type: 'string',
+										default: '',
+										description: 'Name of the cargo/shipping company',
+									},
+									{
+										displayName: 'Cargo Company ID',
+										name: 'cargoCompanyId',
+										type: 'string',
+										default: '',
+										description: 'ID of the cargo/shipping company',
+									},
+									{
+										displayName: 'Barcode',
+										name: 'barcode',
+										type: 'string',
+										default: '',
+										description: 'Barcode for the shipment',
+									},
+									{
+										displayName: 'Send Tracking Notification',
+										name: 'isSendNotification',
+										type: 'boolean',
+										default: false,
+										description: 'Whether to send tracking notification to customer',
+									},
+								],
+							},
+						],
+					},
+				],
+			},
+			{
+				displayName: 'Global Source ID',
+				name: 'globalSourceId',
+				type: 'string',
+				displayOptions: {
+					show: {
+						resource: ['order'],
+						operation: ['updatePackageStatus'],
+					},
+				},
+				default: '',
+				description: 'Global source ID for the entire update operation (optional)',
 			},
 			// Product Search Parameters
 			{
@@ -1007,6 +1328,244 @@ export class Ikas implements INodeType {
 						this.logger.info(JSON.stringify(responseData, null, 2), {
 							message: 'Orders are here',
 						});
+					} else if (operation === 'fulfill') {
+						// Build fulfill order input
+						const orderId = this.getNodeParameter('orderId', i) as string;
+						const fulfillLinesData = this.getNodeParameter('fulfillLines', i) as any;
+						const markAsReadyForShipment = this.getNodeParameter(
+							'markAsReadyForShipment',
+							i,
+						) as boolean;
+						const sendNotificationToCustomer = this.getNodeParameter(
+							'sendNotificationToCustomer',
+							i,
+						) as boolean;
+						const sourcePackageId = this.getNodeParameter('sourcePackageId', i) as string;
+						const trackingInfo = this.getNodeParameter('trackingInfo', i) as any;
+
+						// Validate required fields
+						if (!orderId) {
+							throw new NodeOperationError(
+								this.getNode(),
+								'Order ID is required for fulfill operation',
+								{ itemIndex: i },
+							);
+						}
+
+						// Process line items
+						const lines: any[] = [];
+						if (fulfillLinesData?.lineItems && Array.isArray(fulfillLinesData.lineItems)) {
+							for (const lineItem of fulfillLinesData.lineItems) {
+								if (!lineItem.orderLineItemId) {
+									throw new NodeOperationError(
+										this.getNode(),
+										'Order Line Item ID is required for each line item',
+										{ itemIndex: i },
+									);
+								}
+								if (!lineItem.quantity || lineItem.quantity < 1) {
+									throw new NodeOperationError(
+										this.getNode(),
+										'Quantity must be at least 1 for each line item',
+										{ itemIndex: i },
+									);
+								}
+
+								lines.push({
+									orderLineItemId: lineItem.orderLineItemId,
+									quantity: parseFloat(lineItem.quantity.toString()),
+								});
+							}
+						}
+
+						if (lines.length === 0) {
+							throw new NodeOperationError(
+								this.getNode(),
+								'At least one line item is required for fulfill operation',
+								{ itemIndex: i },
+							);
+						}
+
+						// Build fulfill input
+						const fulfillInput: any = {
+							orderId: orderId,
+							lines: lines,
+						};
+
+						// Add optional boolean fields
+						if (markAsReadyForShipment) {
+							fulfillInput.markAsReadyForShipment = markAsReadyForShipment;
+						}
+
+						if (sendNotificationToCustomer) {
+							fulfillInput.sendNotificationToCustomer = sendNotificationToCustomer;
+						}
+
+						// Add source package ID if provided
+						if (sourcePackageId) {
+							fulfillInput.sourcePackageId = sourcePackageId;
+						}
+
+						// Add tracking information if provided
+						if (trackingInfo && Object.keys(trackingInfo).length > 0) {
+							const trackingInfoDetail: any = {};
+
+							if (trackingInfo.trackingNumber) {
+								trackingInfoDetail.trackingNumber = trackingInfo.trackingNumber;
+							}
+							if (trackingInfo.trackingLink) {
+								trackingInfoDetail.trackingLink = trackingInfo.trackingLink;
+							}
+							if (trackingInfo.cargoCompany) {
+								trackingInfoDetail.cargoCompany = trackingInfo.cargoCompany;
+							}
+							if (trackingInfo.cargoCompanyId) {
+								trackingInfoDetail.cargoCompanyId = trackingInfo.cargoCompanyId;
+							}
+							if (trackingInfo.barcode) {
+								trackingInfoDetail.barcode = trackingInfo.barcode;
+							}
+							if (trackingInfo.isSendNotification !== undefined) {
+								trackingInfoDetail.isSendNotification = trackingInfo.isSendNotification;
+							}
+
+							if (Object.keys(trackingInfoDetail).length > 0) {
+								fulfillInput.trackingInfoDetail = trackingInfoDetail;
+							}
+						}
+
+						this.logger.info(JSON.stringify(fulfillInput, null, 2), {
+							message: 'Fulfill input is here',
+						});
+
+						const response = await ikasGraphQLRequest.call(this, FulfillOrderMutation, {
+							input: fulfillInput,
+						});
+
+						this.logger.info(JSON.stringify(response, null, 2), {
+							message: 'Fulfill order response is here',
+						});
+
+						responseData = response.data?.fulfillOrder || {};
+					} else if (operation === 'updatePackageStatus') {
+						// Build update package status input
+						const orderIdForPackageStatus = this.getNodeParameter(
+							'orderIdForPackageStatus',
+							i,
+						) as string;
+						const packageUpdatesData = this.getNodeParameter('packageUpdates', i) as any;
+						const globalSourceId = this.getNodeParameter('globalSourceId', i) as string;
+
+						// Validate required fields
+						if (!orderIdForPackageStatus) {
+							throw new NodeOperationError(
+								this.getNode(),
+								'Order ID is required for update package status operation',
+								{ itemIndex: i },
+							);
+						}
+
+						// Process packages
+						const packages: any[] = [];
+						if (packageUpdatesData?.packages && Array.isArray(packageUpdatesData.packages)) {
+							for (const packageUpdate of packageUpdatesData.packages) {
+								if (!packageUpdate.packageId) {
+									throw new NodeOperationError(
+										this.getNode(),
+										'Package ID is required for each package update',
+										{ itemIndex: i },
+									);
+								}
+								if (!packageUpdate.status) {
+									throw new NodeOperationError(
+										this.getNode(),
+										'Status is required for each package update',
+										{ itemIndex: i },
+									);
+								}
+
+								const packageData: any = {
+									packageId: packageUpdate.packageId,
+									status: packageUpdate.status,
+								};
+
+								// Add optional fields
+								if (packageUpdate.errorMessage) {
+									packageData.errorMessage = packageUpdate.errorMessage;
+								}
+
+								if (packageUpdate.sourceId) {
+									packageData.sourceId = packageUpdate.sourceId;
+								}
+
+								// Add tracking information if provided
+								if (
+									packageUpdate.trackingInfo &&
+									Object.keys(packageUpdate.trackingInfo).length > 0
+								) {
+									const trackingInfo = packageUpdate.trackingInfo;
+									const trackingInfoDetail: any = {};
+
+									if (trackingInfo.trackingNumber) {
+										trackingInfoDetail.trackingNumber = trackingInfo.trackingNumber;
+									}
+									if (trackingInfo.trackingLink) {
+										trackingInfoDetail.trackingLink = trackingInfo.trackingLink;
+									}
+									if (trackingInfo.cargoCompany) {
+										trackingInfoDetail.cargoCompany = trackingInfo.cargoCompany;
+									}
+									if (trackingInfo.cargoCompanyId) {
+										trackingInfoDetail.cargoCompanyId = trackingInfo.cargoCompanyId;
+									}
+									if (trackingInfo.barcode) {
+										trackingInfoDetail.barcode = trackingInfo.barcode;
+									}
+									if (trackingInfo.isSendNotification !== undefined) {
+										trackingInfoDetail.isSendNotification = trackingInfo.isSendNotification;
+									}
+
+									if (Object.keys(trackingInfoDetail).length > 0) {
+										packageData.trackingInfo = trackingInfoDetail;
+									}
+								}
+
+								packages.push(packageData);
+							}
+						}
+
+						if (packages.length === 0) {
+							throw new NodeOperationError(
+								this.getNode(),
+								'At least one package update is required',
+								{ itemIndex: i },
+							);
+						}
+
+						// Build update input
+						const updateInput: any = {
+							orderId: orderIdForPackageStatus,
+							packages: packages,
+						};
+
+						// Add global source ID if provided
+						if (globalSourceId) {
+							updateInput.sourceId = globalSourceId;
+						}
+
+						this.logger.info(JSON.stringify(updateInput, null, 2), {
+							message: 'Update package status input is here',
+						});
+
+						const response = await ikasGraphQLRequest.call(this, UpdateOrderPackageStatusMutation, {
+							input: updateInput,
+						});
+
+						this.logger.info(JSON.stringify(response, null, 2), {
+							message: 'Update package status response is here',
+						});
+
+						responseData = response.data?.updateOrderPackageStatus || {};
 					} else {
 						throw new NodeOperationError(
 							this.getNode(),
@@ -1038,6 +1597,12 @@ export class Ikas implements INodeType {
 						...order,
 						_pagination: paging,
 					}));
+				} else if (resource === 'order' && operation === 'fulfill') {
+					// For fulfill order, return the updated order
+					dataToReturn = [responseData || {}];
+				} else if (resource === 'order' && operation === 'updatePackageStatus') {
+					// For update package status, return the updated order
+					dataToReturn = [responseData || {}];
 				} else if (resource === 'product' && operation === 'search') {
 					// For product search, handle the search response structure
 					const products = responseData.data || [];
