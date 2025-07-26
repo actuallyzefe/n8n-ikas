@@ -6,6 +6,7 @@ export const GetProductsQuery = `
 										name
 										type
 										totalStock
+										salesChannelIds
 										variants {
 											id
 										}
