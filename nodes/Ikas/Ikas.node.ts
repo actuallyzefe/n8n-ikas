@@ -10,7 +10,9 @@ import { ikasGraphQLRequest } from './GenericFunctions';
 import { SearchProductsQuery } from './graphql/queries/SearchProducts';
 import { GetProductsQuery } from './graphql/queries/GetProducts';
 import { GetOrdersQuery } from './graphql/queries/GetOrders';
+import { GetStockLocationsQuery } from './graphql/queries/GetStockLocations';
 import { SaveProductMutation } from './graphql/mutations/SaveProduct';
+import { SaveStockLocationsMutation } from './graphql/mutations/SaveStockLocations';
 
 export class Ikas implements INodeType {
 	description: INodeTypeDescription = {
@@ -461,6 +463,41 @@ export class Ikas implements INodeType {
 				description: 'SKU for the simple product (optional)',
 			},
 			{
+				displayName: 'Stock Count',
+				name: 'stockCount',
+				type: 'number',
+				displayOptions: {
+					show: {
+						resource: ['product'],
+						operation: ['create', 'update'],
+						productStructure: ['simple'],
+					},
+				},
+				default: 0,
+				description: 'Initial stock count for the simple product',
+				typeOptions: {
+					minValue: 0,
+				},
+			},
+			{
+				displayName: 'Stock Location Name',
+				name: 'stockLocationName',
+				type: 'string',
+				displayOptions: {
+					show: {
+						resource: ['product'],
+						operation: ['create', 'update'],
+						productStructure: ['simple'],
+					},
+					hide: {
+						stockCount: [0],
+					},
+				},
+				default: '',
+				description:
+					'Name of the stock location where the stock will be stored (partial names supported)',
+			},
+			{
 				displayName: 'Description',
 				name: 'description',
 				type: 'string',
@@ -511,45 +548,6 @@ export class Ikas implements INodeType {
 				},
 				default: 0,
 				description: 'Maximum quantity allowed per cart',
-			},
-			{
-				displayName: 'Brand ID',
-				name: 'brandId',
-				type: 'string',
-				displayOptions: {
-					show: {
-						resource: ['product'],
-						operation: ['create', 'update'],
-					},
-				},
-				default: '',
-				description: 'ID of the product brand',
-			},
-			{
-				displayName: 'Category IDs',
-				name: 'categoryIds',
-				type: 'string',
-				displayOptions: {
-					show: {
-						resource: ['product'],
-						operation: ['create', 'update'],
-					},
-				},
-				default: '',
-				description: 'Comma-separated list of category IDs',
-			},
-			{
-				displayName: 'Tag IDs',
-				name: 'tagIds',
-				type: 'string',
-				displayOptions: {
-					show: {
-						resource: ['product'],
-						operation: ['create', 'update'],
-					},
-				},
-				default: '',
-				description: 'Comma-separated list of tag IDs',
 			},
 			{
 				displayName: 'Sales Channel IDs',
@@ -761,28 +759,6 @@ export class Ikas implements INodeType {
 							productInput.maxQuantityPerCart = maxQuantityPerCart;
 						}
 
-						const brandId = this.getNodeParameter('brandId', i) as string;
-						if (brandId) {
-							productInput.brandId = brandId;
-						}
-
-						// Handle comma-separated lists
-						const categoryIds = this.getNodeParameter('categoryIds', i) as string;
-						if (categoryIds) {
-							productInput.categoryIds = categoryIds
-								.split(',')
-								.map((id) => id.trim())
-								.filter((id) => id);
-						}
-
-						const tagIds = this.getNodeParameter('tagIds', i) as string;
-						if (tagIds) {
-							productInput.tagIds = tagIds
-								.split(',')
-								.map((id) => id.trim())
-								.filter((id) => id);
-						}
-
 						const salesChannelIds = this.getNodeParameter('salesChannelIds', i) as string;
 						if (salesChannelIds) {
 							productInput.salesChannelIds = salesChannelIds;
@@ -793,6 +769,8 @@ export class Ikas implements INodeType {
 						const buyPrice = this.getNodeParameter('buyPrice', i) as number;
 						const discountPrice = this.getNodeParameter('discountPrice', i) as number;
 						const sku = this.getNodeParameter('sku', i) as string;
+						const stockCount = this.getNodeParameter('stockCount', i) as number;
+						const stockLocationName = this.getNodeParameter('stockLocationName', i) as string;
 
 						const defaultVariant: any = {
 							isActive: true,
@@ -854,7 +832,111 @@ export class Ikas implements INodeType {
 							input: productInput,
 						});
 
+						this.logger.info(JSON.stringify(response, null, 2), {
+							message: 'Response is here',
+						});
+
 						responseData = response.data?.saveProduct || {};
+
+						// Handle stock management after product creation
+						if (stockCount > 0 && stockLocationName) {
+							try {
+								const productId = responseData.id;
+								const variantId = responseData.variants?.[0]?.id;
+
+								this.logger.info(JSON.stringify(productId, null, 2), {
+									message: 'Product ID is here',
+								});
+								this.logger.info(JSON.stringify(variantId, null, 2), {
+									message: 'Variant ID is here',
+								});
+
+								if (productId && variantId) {
+									// First, find the stock location by name
+									const stockLocationResponse = await ikasGraphQLRequest.call(
+										this,
+										GetStockLocationsQuery,
+										{
+											name: {
+												like: stockLocationName,
+											},
+										},
+									);
+
+									this.logger.info(JSON.stringify(stockLocationResponse, null, 2), {
+										message: 'Stock location response is here',
+									});
+
+									const stockLocations = stockLocationResponse.data?.listStockLocation || [];
+
+									this.logger.info(JSON.stringify(stockLocations, null, 2), {
+										message: 'Stock locations are here',
+									});
+
+									if (stockLocations.length === 0) {
+										throw new Error(`No stock location found matching name: ${stockLocationName}`);
+									}
+
+									// Use the first matching stock location
+									const stockLocation = stockLocations[0];
+									const stockLocationId = stockLocation.id;
+
+									this.logger.info(
+										`Found stock location: ${stockLocation.name} (ID: ${stockLocationId})`,
+									);
+
+									const stockInput = {
+										productStockLocationInputs: [
+											{
+												productId: productId,
+												variantId: variantId,
+												stockLocationId: stockLocationId,
+												stockCount: stockCount,
+											},
+										],
+									};
+
+									const stockResponse = await ikasGraphQLRequest.call(
+										this,
+										SaveStockLocationsMutation,
+										{
+											input: stockInput,
+										},
+									);
+
+									this.logger.info(JSON.stringify(stockResponse, null, 2), {
+										message: 'Stock management response',
+									});
+
+									// Add stock information to the response data
+									if (stockResponse.data?.saveProductStockLocations === true) {
+										responseData.stockCreated = true;
+										responseData.stockLocationUsed = {
+											id: stockLocationId,
+											name: stockLocation.name,
+											stockCount: stockCount,
+										};
+									}
+								} else {
+									this.logger.warn('Could not create stock: missing product ID or variant ID');
+								}
+							} catch (stockError) {
+								this.logger.error(JSON.stringify(stockError, null, 2), {
+									message: 'Stock error is here',
+								});
+								this.logger.error('Failed to create stock after product creation', {
+									error: stockError,
+									productId: responseData.id,
+									stockCount,
+									stockLocationName,
+								});
+								// Don't throw - product was created successfully, just stock failed
+							}
+						}
+
+						this.logger.info(JSON.stringify(responseData, null, 2), {
+							message: 'Response data is here',
+						});
 					} else {
 						throw new NodeOperationError(
 							this.getNode(),
