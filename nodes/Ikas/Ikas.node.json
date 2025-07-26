@@ -1,0 +1,22 @@
+{
+  "node": "n8n-nodes-base.ikas",
+  "nodeVersion": "1.0",
+  "codexVersion": "1.0",
+  "categories": ["Sales"],
+  "resources": {
+    "credentialDocumentation": [
+      {
+        "url": "https://ikas.dev/docs/api/getting-started/authentication"
+      }
+    ],
+    "primaryDocumentation": [
+      {
+        "url": "https://ikas.dev/docs/intro"
+      }
+    ]
+  },
+  "alias": ["e-commerce", "ecommerce", "shop", "store", "turkey", "german"],
+  "subcategories": {
+    "Sales": ["E-commerce Platforms"]
+  }
+}

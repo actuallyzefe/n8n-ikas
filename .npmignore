@@ -1,2 +1,4 @@
-.DS_Store
-*.tsbuildinfo
+**/*
+!dist/**
+!LICENSE.md
+!README.md 

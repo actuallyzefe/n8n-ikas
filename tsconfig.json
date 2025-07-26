@@ -1,30 +1,30 @@
 {
 	"compilerOptions": {
-		"strict": true,
 		"module": "commonjs",
-		"moduleResolution": "node",
-		"target": "es2019",
-		"lib": ["es2019", "es2020", "es2022.error"],
-		"removeComments": true,
-		"useUnknownInCatchVariables": false,
-		"forceConsistentCasingInFileNames": true,
-		"noImplicitAny": true,
-		"noImplicitReturns": true,
-		"noUnusedLocals": true,
-		"strictNullChecks": true,
-		"preserveConstEnums": true,
-		"esModuleInterop": true,
-		"resolveJsonModule": true,
-		"incremental": true,
+		"target": "es2022",
+		"lib": ["es2022"],
 		"declaration": true,
-		"sourceMap": true,
+		"outDir": "./dist",
+		"strict": true,
+		"noImplicitAny": true,
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
 		"skipLibCheck": true,
-		"outDir": "./dist/",
+		"forceConsistentCasingInFileNames": true,
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
+		"resolveJsonModule": true,
+		"moduleResolution": "node",
+		"sourceMap": true,
+		"inlineSourceMap": false,
+		"typeRoots": ["./node_modules/@types"]
 	},
 	"include": [
 		"credentials/**/*",
-		"nodes/**/*",
-		"nodes/**/*.json",
-		"package.json",
+		"nodes/**/*"
 	],
-}
+	"exclude": [
+		"node_modules/**/*",
+		"dist/**/*"
+	]
+} 

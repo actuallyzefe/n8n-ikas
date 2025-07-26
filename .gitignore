@@ -1,8 +1,6 @@
-node_modules
+node_modules/
+dist/
+*.log
 .DS_Store
-.tmp
-tmp
-dist
-npm-debug.log*
-yarn.lock
-.vscode/launch.json
+.env
+.vscode/settings.json 
