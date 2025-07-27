@@ -9,9 +9,10 @@ import { GetProductByIdQuery } from '../../graphql/queries/GetProductById';
  * Fetches existing product data by ID
  */
 async function fetchExistingProduct(context: IExecuteFunctions, productId: string): Promise<any> {
+	const trimmedProductId = productId.trim();
 	const productToUpdate = await ikasGraphQLRequest.call(context, GetProductByIdQuery, {
 		id: {
-			eq: productId,
+			eq: trimmedProductId,
 		},
 	});
 
