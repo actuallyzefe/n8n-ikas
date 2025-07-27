@@ -10,6 +10,7 @@ import { NodeConnectionType, NodeOperationError } from 'n8n-workflow';
 
 import { ikasGraphQLRequest } from './GenericFunctions';
 import { GetSalesChannelsQuery } from './graphql/queries/GetSalesChannels';
+import { GetStockLocationsQuery } from './graphql/queries/GetStockLocations';
 import { buildNodeProperties } from './node-definition/properties';
 import {
 	createProduct,
@@ -70,6 +71,30 @@ export class Ikas implements INodeType {
 				} catch (error) {
 					this.logger.error(JSON.stringify(error, null, 2), {
 						message: 'Error loading sales channels',
+					});
+					return [];
+				}
+			},
+
+			async getStockLocations(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+				try {
+					const response = await ikasGraphQLRequest.call(this, GetStockLocationsQuery);
+					this.logger.info(JSON.stringify(response, null, 2), {
+						message: 'Stock locations response is here',
+					});
+					const stockLocations = response.data?.listStockLocation || [];
+
+					this.logger.info(JSON.stringify(stockLocations, null, 2), {
+						message: 'Stock locations are here',
+					});
+
+					return stockLocations.map((location: any) => ({
+						name: `${location.name}`,
+						value: location.id,
+					}));
+				} catch (error) {
+					this.logger.error(JSON.stringify(error, null, 2), {
+						message: 'Error loading stock locations',
 					});
 					return [];
 				}

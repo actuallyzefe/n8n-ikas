@@ -122,17 +122,13 @@ function processAdditionalFields(
 }
 
 /**
- * Finds a stock location by name
+ * Validates a stock location ID exists
  */
-async function findStockLocationByName(
+async function validateStockLocationId(
 	context: IExecuteFunctions,
-	stockLocationName: string,
+	stockLocationId: string,
 ): Promise<any> {
-	const stockLocationResponse = await ikasGraphQLRequest.call(context, GetStockLocationsQuery, {
-		name: {
-			like: stockLocationName,
-		},
-	});
+	const stockLocationResponse = await ikasGraphQLRequest.call(context, GetStockLocationsQuery);
 
 	context.logger.info(JSON.stringify(stockLocationResponse, null, 2), {
 		message: 'Stock location response is here',
@@ -144,14 +140,16 @@ async function findStockLocationByName(
 		message: 'Stock locations are here',
 	});
 
-	if (stockLocations.length === 0) {
+	const stockLocation = stockLocations.find((location: any) => location.id === stockLocationId);
+
+	if (!stockLocation) {
 		throw new NodeOperationError(
 			context.getNode(),
-			`No stock location found matching name: ${stockLocationName}`,
+			`No stock location found with ID: ${stockLocationId}`,
 		);
 	}
 
-	return stockLocations[0];
+	return stockLocation;
 }
 
 /**
@@ -162,13 +160,12 @@ async function createProductStock(
 	productId: string,
 	variantId: string,
 	stockCount: number,
-	stockLocationName: string,
+	stockLocationId: string,
 ): Promise<any> {
-	// Find the stock location by name
-	const stockLocation = await findStockLocationByName(context, stockLocationName);
-	const stockLocationId = stockLocation.id;
+	// Validate the stock location ID exists
+	const stockLocation = await validateStockLocationId(context, stockLocationId);
 
-	context.logger.info(`Found stock location: ${stockLocation.name} (ID: ${stockLocationId})`);
+	context.logger.info(`Using stock location: ${stockLocation.name} (ID: ${stockLocationId})`);
 
 	const stockInput = {
 		productStockLocationInputs: [
@@ -211,9 +208,9 @@ async function handleStockManagement(
 	context: IExecuteFunctions,
 	responseData: any,
 	stockCount: number,
-	stockLocationName: string,
+	stockLocationId: string,
 ): Promise<void> {
-	if (stockCount <= 0 || !stockLocationName) return;
+	if (stockCount <= 0 || !stockLocationId) return;
 
 	try {
 		const productId = responseData.id;
@@ -232,7 +229,7 @@ async function handleStockManagement(
 				productId,
 				variantId,
 				stockCount,
-				stockLocationName,
+				stockLocationId,
 			);
 
 			if (stockInfo) {
@@ -249,7 +246,7 @@ async function handleStockManagement(
 			error: stockError,
 			productId: responseData.id,
 			stockCount,
-			stockLocationName,
+			stockLocationId,
 		});
 		// Don't throw - product was created successfully, just stock failed
 	}
@@ -281,9 +278,9 @@ export async function createProduct(this: IExecuteFunctions, itemIndex: number):
 
 	// Handle stock management after product creation
 	const stockCount = this.getNodeParameter('stockCount', itemIndex) as number;
-	const stockLocationName = this.getNodeParameter('stockLocationName', itemIndex) as string;
+	const stockLocationId = this.getNodeParameter('stockLocationId', itemIndex) as string;
 
-	await handleStockManagement(this, responseData, stockCount, stockLocationName);
+	await handleStockManagement(this, responseData, stockCount, stockLocationId);
 
 	this.logger.info(JSON.stringify(responseData, null, 2), {
 		message: 'Response data is here',

@@ -305,9 +305,12 @@ export const productCreateUpdateProperties: INodeProperties[] = [
 		},
 	},
 	{
-		displayName: 'Stock Location Name',
-		name: 'stockLocationName',
-		type: 'string',
+		displayName: 'Stock Location',
+		name: 'stockLocationId',
+		type: 'options',
+		typeOptions: {
+			loadOptionsMethod: 'getStockLocations',
+		},
 		displayOptions: {
 			show: {
 				resource: ['product'],
@@ -320,7 +323,7 @@ export const productCreateUpdateProperties: INodeProperties[] = [
 		},
 		default: '',
 		description:
-			'Name of the stock location where the stock will be stored (partial names supported)',
+			'Select the stock location where the stock will be stored. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
 	// Description fields
 	{
