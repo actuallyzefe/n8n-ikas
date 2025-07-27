@@ -110,8 +110,6 @@ export class Ikas implements INodeType {
 
 		for (let i = 0; i < items.length; i++) {
 			try {
-				let responseData: any;
-
 				// Define operation handlers for each resource
 				const resourceHandlers = {
 					product: {
@@ -158,7 +156,7 @@ export class Ikas implements INodeType {
 				}
 
 				// Execute the handler
-				responseData = await operationHandler.call(this, i);
+				const responseData = await operationHandler.call(this, i);
 
 				this.logger.info(JSON.stringify(responseData, null, 2), {
 					message: 'Response data is here',
