@@ -1,8 +1,10 @@
 import type {
 	IExecuteFunctions,
+	ILoadOptionsFunctions,
 	INodeExecutionData,
 	INodeType,
 	INodeTypeDescription,
+	INodePropertyOptions,
 } from 'n8n-workflow';
 import { NodeConnectionType, NodeOperationError } from 'n8n-workflow';
 
@@ -16,6 +18,7 @@ import { SaveStockLocationsMutation } from './graphql/mutations/SaveStockLocatio
 import { FulfillOrderMutation } from './graphql/mutations/FulfillOrder';
 import { UpdateOrderPackageStatusMutation } from './graphql/mutations/UpdateOrderPackageStatus';
 import { GetProductByIdQuery } from './graphql/queries/GetProductById';
+import { GetSalesChannelsQuery } from './graphql/queries/GetSalesChannels';
 
 export class Ikas implements INodeType {
 	description: INodeTypeDescription = {
@@ -1060,17 +1063,20 @@ export class Ikas implements INodeType {
 				description: 'Maximum quantity allowed per cart',
 			},
 			{
-				displayName: 'Sales Channel IDs',
+				displayName: 'Sales Channels',
 				name: 'salesChannelIds',
-				type: 'string',
+				type: 'multiOptions',
+				typeOptions: {
+					loadOptionsMethod: 'getSalesChannels',
+				},
 				displayOptions: {
 					show: {
 						resource: ['product'],
 						operation: ['create', 'update'],
 					},
 				},
-				default: '',
-				description: 'Comma-separated list of sales channel IDs',
+				default: [],
+				description: 'Select the sales channels where this product will be available',
 			},
 
 			{
@@ -1115,11 +1121,14 @@ export class Ikas implements INodeType {
 						description: 'Variant type ID to group variants by',
 					},
 					{
-						displayName: 'Hidden Sales Channel IDs',
+						displayName: 'Hidden Sales Channels',
 						name: 'hiddenSalesChannelIds',
-						type: 'string',
-						default: '',
-						description: 'Comma-separated list of hidden sales channel IDs',
+						type: 'multiOptions',
+						typeOptions: {
+							loadOptionsMethod: 'getSalesChannels',
+						},
+						default: [],
+						description: 'Select sales channels where this product will be hidden',
 					},
 					{
 						displayName: 'Meta Data',
@@ -1166,6 +1175,34 @@ export class Ikas implements INodeType {
 				],
 			},
 		],
+	};
+
+	methods = {
+		loadOptions: {
+			async getSalesChannels(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+				try {
+					const response = await ikasGraphQLRequest.call(this, GetSalesChannelsQuery);
+					this.logger.info(JSON.stringify(response, null, 2), {
+						message: 'Sales channels response is here',
+					});
+					const salesChannels = response.data?.listSalesChannel || [];
+
+					this.logger.info(JSON.stringify(salesChannels, null, 2), {
+						message: 'Sales channels are here',
+					});
+
+					return salesChannels.map((channel: any) => ({
+						name: `${channel.name}`,
+						value: channel.id,
+					}));
+				} catch (error) {
+					this.logger.error(JSON.stringify(error, null, 2), {
+						message: 'Error loading sales channels',
+					});
+					return [];
+				}
+			},
+		},
 	};
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
@@ -1222,7 +1259,7 @@ export class Ikas implements INodeType {
 							input: searchInput,
 						});
 
-						responseData = response.data?.searchProducts || {};
+						responseData = response.data?.searchProducts || { results: [], paging: {} };
 
 						this.logger.info(JSON.stringify(responseData, null, 2), {
 							message: 'Search Products are here',
@@ -1255,8 +1292,8 @@ export class Ikas implements INodeType {
 							productInput.maxQuantityPerCart = maxQuantityPerCart;
 						}
 
-						const salesChannelIds = this.getNodeParameter('salesChannelIds', i) as string;
-						if (salesChannelIds) {
+						const salesChannelIds = this.getNodeParameter('salesChannelIds', i) as string[];
+						if (salesChannelIds && salesChannelIds.length > 0) {
 							productInput.salesChannelIds = salesChannelIds;
 						}
 
@@ -1292,8 +1329,14 @@ export class Ikas implements INodeType {
 							Object.keys(additionalFields).forEach((key) => {
 								const value = additionalFields[key];
 								if (value !== undefined && value !== '') {
+									// Handle array fields that used to be comma-separated strings
+									if (key === 'hiddenSalesChannelIds') {
+										if (Array.isArray(value) && value.length > 0) {
+											productInput[key] = value;
+										}
+									}
 									// Handle comma-separated string fields
-									if (key === 'hiddenSalesChannelIds' || key === 'dynamicPriceListIds') {
+									else if (key === 'dynamicPriceListIds') {
 										productInput[key] = value;
 									}
 									// Handle JSON fields
@@ -1475,9 +1518,12 @@ export class Ikas implements INodeType {
 							productInput.maxQuantityPerCart = maxQuantityPerCart;
 						}
 
-						const salesChannelIds = product.salesChannelIds;
+						const salesChannelIds = this.getNodeParameter('salesChannelIds', i) as string[];
 						if (salesChannelIds && salesChannelIds.length > 0) {
 							productInput.salesChannelIds = salesChannelIds;
+						} else if (product.salesChannelIds && product.salesChannelIds.length > 0) {
+							// Keep existing sales channels if none specified
+							productInput.salesChannelIds = product.salesChannelIds;
 						}
 
 						// Handle variant updates - variants are required by IKAS API even for updates
@@ -1546,8 +1592,14 @@ export class Ikas implements INodeType {
 							Object.keys(additionalFields).forEach((key) => {
 								const value = additionalFields[key];
 								if (value !== undefined && value !== null && value !== '') {
+									// Handle array fields that used to be comma-separated strings
+									if (key === 'hiddenSalesChannelIds') {
+										if (Array.isArray(value) && value.length > 0) {
+											productInput[key] = value;
+										}
+									}
 									// Handle comma-separated string fields
-									if (key === 'hiddenSalesChannelIds' || key === 'dynamicPriceListIds') {
+									else if (key === 'dynamicPriceListIds') {
 										productInput[key] = value;
 									}
 									// Handle JSON fields
@@ -1947,7 +1999,7 @@ export class Ikas implements INodeType {
 					dataToReturn = [responseData || {}];
 				} else if (resource === 'product' && operation === 'search') {
 					// For product search, handle the search response structure
-					const products = responseData.data || [];
+					const products = responseData.results || [];
 					const paging = responseData.paging || {};
 
 					dataToReturn = products.map((product: any) => ({
