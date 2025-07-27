@@ -87,43 +87,57 @@ export class Ikas implements INodeType {
 			try {
 				let responseData: any;
 
-				if (resource === 'product') {
-					if (operation === 'getMany') {
-						responseData = await getManyProducts.call(this, i);
-					} else if (operation === 'search') {
-						responseData = await searchProducts.call(this, i);
-					} else if (operation === 'create') {
-						responseData = await createProduct.call(this, i);
-					} else if (operation === 'update') {
-						responseData = await updateProduct.call(this, i);
-					} else {
-						throw new NodeOperationError(
-							this.getNode(),
-							`Operation "${operation}" is not yet implemented for resource "${resource}"`,
-							{ itemIndex: i },
-						);
-					}
-				} else if (resource === 'order') {
-					if (operation === 'getMany') {
-						responseData = await getManyOrders.call(this, i);
-					} else if (operation === 'fulfill') {
-						responseData = await fulfillOrder.call(this, i);
-					} else if (operation === 'updatePackageStatus') {
-						responseData = await updateOrderPackageStatus.call(this, i);
-					} else {
-						throw new NodeOperationError(
-							this.getNode(),
-							`Operation "${operation}" is not yet implemented for resource "${resource}"`,
-							{ itemIndex: i },
-						);
-					}
-				} else {
+				// Define operation handlers for each resource
+				const resourceHandlers = {
+					product: {
+						getMany: getManyProducts,
+						search: searchProducts,
+						create: createProduct,
+						update: updateProduct,
+					},
+					order: {
+						getMany: getManyOrders,
+						fulfill: fulfillOrder,
+						updatePackageStatus: updateOrderPackageStatus,
+					},
+				};
+
+				// Get the handler for the current resource
+				const resourceHandler = resourceHandlers[resource as keyof typeof resourceHandlers];
+
+				this.logger.info(JSON.stringify(resourceHandler, null, 2), {
+					message: 'Resource handler is here',
+				});
+
+				if (!resourceHandler) {
 					throw new NodeOperationError(
 						this.getNode(),
 						`Resource "${resource}" is not yet implemented`,
 						{ itemIndex: i },
 					);
 				}
+
+				// Get the operation handler
+				const operationHandler = resourceHandler[operation as keyof typeof resourceHandler];
+
+				this.logger.info(JSON.stringify(operationHandler, null, 2), {
+					message: 'Operation handler is here',
+				});
+
+				if (!operationHandler) {
+					throw new NodeOperationError(
+						this.getNode(),
+						`Operation "${operation}" is not yet implemented for resource "${resource}"`,
+						{ itemIndex: i },
+					);
+				}
+
+				// Execute the handler
+				responseData = await operationHandler.call(this, i);
+
+				this.logger.info(JSON.stringify(responseData, null, 2), {
+					message: 'Response data is here',
+				});
 
 				// Handle different response structures
 				let dataToReturn: any[] = [];
