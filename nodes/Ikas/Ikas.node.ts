@@ -1063,7 +1063,7 @@ export class Ikas implements INodeType {
 				description: 'Maximum quantity allowed per cart',
 			},
 			{
-				displayName: 'Sales Channels',
+				displayName: 'Sales Channel Names',
 				name: 'salesChannelIds',
 				type: 'multiOptions',
 				typeOptions: {
@@ -1076,7 +1076,8 @@ export class Ikas implements INodeType {
 					},
 				},
 				default: [],
-				description: 'Select the sales channels where this product will be available',
+				description:
+					'Select the sales channels where this product will be available. Choose from the list.',
 			},
 
 			{
