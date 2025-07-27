@@ -317,9 +317,6 @@ export const productCreateUpdateProperties: INodeProperties[] = [
 				operation: ['create', 'update'],
 				productStructure: ['simple'],
 			},
-			hide: {
-				stockCount: [0],
-			},
 		},
 		default: '',
 		description:

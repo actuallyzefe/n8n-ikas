@@ -23,16 +23,16 @@ function buildOrderFilterVariables(context: IExecuteFunctions, itemIndex: number
 	}
 
 	// Payment status filter - using proper filter format
-	if (additionalFilters.paymentStatus && additionalFilters.paymentStatus.length > 0) {
+	if (additionalFilters.orderPaymentStatus && additionalFilters.orderPaymentStatus.length > 0) {
 		orderVariables.orderPaymentStatus = {
-			in: additionalFilters.paymentStatus,
+			in: additionalFilters.orderPaymentStatus,
 		};
 	}
 
 	// Package status filter - using proper filter format
-	if (additionalFilters.packageStatus && additionalFilters.packageStatus.length > 0) {
+	if (additionalFilters.orderPackageStatus && additionalFilters.orderPackageStatus.length > 0) {
 		orderVariables.orderPackageStatus = {
-			in: additionalFilters.packageStatus,
+			in: additionalFilters.orderPackageStatus,
 		};
 	}
 
@@ -52,13 +52,6 @@ function buildOrderFilterVariables(context: IExecuteFunctions, itemIndex: number
 	if (additionalFilters.orderNumber) {
 		orderVariables.orderNumber = {
 			eq: additionalFilters.orderNumber,
-		};
-	}
-
-	// Sales channel filter - using proper filter format
-	if (additionalFilters.salesChannelId) {
-		orderVariables.salesChannelId = {
-			eq: additionalFilters.salesChannelId,
 		};
 	}
 
