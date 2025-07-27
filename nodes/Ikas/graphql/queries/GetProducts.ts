@@ -9,6 +9,10 @@ export const GetProductsQuery = `
 										salesChannelIds
 										variants {
 											id
+											variantValueIds {
+												variantTypeId
+												variantValueId
+											}
 										}
 										categories {
 											id

@@ -15,6 +15,7 @@ import { SaveProductMutation } from './graphql/mutations/SaveProduct';
 import { SaveStockLocationsMutation } from './graphql/mutations/SaveStockLocations';
 import { FulfillOrderMutation } from './graphql/mutations/FulfillOrder';
 import { UpdateOrderPackageStatusMutation } from './graphql/mutations/UpdateOrderPackageStatus';
+import { GetProductByIdQuery } from './graphql/queries/GetProductById';
 
 export class Ikas implements INodeType {
 	description: INodeTypeDescription = {
@@ -689,11 +690,25 @@ export class Ikas implements INodeType {
 				displayOptions: {
 					show: {
 						resource: ['product'],
-						operation: ['create', 'update'],
+						operation: ['create'],
 					},
 				},
 				default: '',
 				description: 'Name of the product',
+				required: true,
+			},
+			{
+				displayName: 'Product Name',
+				name: 'productName',
+				type: 'string',
+				displayOptions: {
+					show: {
+						resource: ['product'],
+						operation: ['update'],
+					},
+				},
+				default: '',
+				description: 'Name of the product (required by IKAS API)',
 				required: true,
 			},
 			{
@@ -703,7 +718,7 @@ export class Ikas implements INodeType {
 				displayOptions: {
 					show: {
 						resource: ['product'],
-						operation: ['create', 'update'],
+						operation: ['create'],
 					},
 				},
 				options: [
@@ -726,6 +741,38 @@ export class Ikas implements INodeType {
 				],
 				default: 'PHYSICAL',
 				description: 'Type of the product',
+				required: true,
+			},
+			{
+				displayName: 'Product Type',
+				name: 'productType',
+				type: 'options',
+				displayOptions: {
+					show: {
+						resource: ['product'],
+						operation: ['update'],
+					},
+				},
+				options: [
+					{
+						name: 'Physical',
+						value: 'PHYSICAL',
+					},
+					{
+						name: 'Digital',
+						value: 'DIGITAL',
+					},
+					{
+						name: 'Bundle',
+						value: 'BUNDLE',
+					},
+					{
+						name: 'Membership',
+						value: 'MEMBERSHIP',
+					},
+				],
+				default: 'PHYSICAL',
+				description: 'Type of the product (required by IKAS API)',
 				required: true,
 			},
 			{
@@ -756,12 +803,30 @@ export class Ikas implements INodeType {
 				displayOptions: {
 					show: {
 						resource: ['product'],
-						operation: ['create', 'update'],
+						operation: ['create'],
 						productStructure: ['simple'],
 					},
 				},
 				default: 0,
 				description: 'Selling price for the simple product',
+				typeOptions: {
+					numberPrecision: 2,
+					minValue: 0,
+				},
+			},
+			{
+				displayName: 'Price',
+				name: 'price',
+				type: 'number',
+				displayOptions: {
+					show: {
+						resource: ['product'],
+						operation: ['update'],
+						productStructure: ['simple'],
+					},
+				},
+				default: null,
+				description: 'Selling price for the simple product (leave empty to keep current price)',
 				typeOptions: {
 					numberPrecision: 2,
 					minValue: 0,
@@ -774,12 +839,30 @@ export class Ikas implements INodeType {
 				displayOptions: {
 					show: {
 						resource: ['product'],
-						operation: ['create', 'update'],
+						operation: ['create'],
 						productStructure: ['simple'],
 					},
 				},
 				default: 0,
 				description: 'Cost/buy price for the simple product',
+				typeOptions: {
+					numberPrecision: 2,
+					minValue: 0,
+				},
+			},
+			{
+				displayName: 'Buy Price',
+				name: 'buyPrice',
+				type: 'number',
+				displayOptions: {
+					show: {
+						resource: ['product'],
+						operation: ['update'],
+						productStructure: ['simple'],
+					},
+				},
+				default: null,
+				description: 'Cost/buy price for the simple product (leave empty to keep current price)',
 				typeOptions: {
 					numberPrecision: 2,
 					minValue: 0,
@@ -792,12 +875,30 @@ export class Ikas implements INodeType {
 				displayOptions: {
 					show: {
 						resource: ['product'],
-						operation: ['create', 'update'],
+						operation: ['create'],
 						productStructure: ['simple'],
 					},
 				},
 				default: null,
 				description: 'Discount price for the simple product (optional)',
+				typeOptions: {
+					numberPrecision: 2,
+					minValue: 0,
+				},
+			},
+			{
+				displayName: 'Discount Price',
+				name: 'discountPrice',
+				type: 'number',
+				displayOptions: {
+					show: {
+						resource: ['product'],
+						operation: ['update'],
+						productStructure: ['simple'],
+					},
+				},
+				default: null,
+				description: 'Discount price for the simple product (leave empty to keep current price)',
 				typeOptions: {
 					numberPrecision: 2,
 					minValue: 0,
@@ -810,12 +911,40 @@ export class Ikas implements INodeType {
 				displayOptions: {
 					show: {
 						resource: ['product'],
-						operation: ['create', 'update'],
+						operation: ['create'],
 						productStructure: ['simple'],
 					},
 				},
 				default: '',
 				description: 'SKU for the simple product (optional)',
+			},
+			{
+				displayName: 'SKU',
+				name: 'sku',
+				type: 'string',
+				displayOptions: {
+					show: {
+						resource: ['product'],
+						operation: ['update'],
+						productStructure: ['simple'],
+					},
+				},
+				default: '',
+				description: 'SKU for the simple product (leave empty to keep current SKU)',
+			},
+			{
+				displayName: 'Variant ID',
+				name: 'variantId',
+				type: 'string',
+				displayOptions: {
+					show: {
+						resource: ['product'],
+						operation: ['update'],
+						productStructure: ['simple'],
+					},
+				},
+				default: '',
+				description: 'ID of the variant to update (required for updating pricing/SKU)',
 			},
 			{
 				displayName: 'Stock Count',
@@ -859,11 +988,24 @@ export class Ikas implements INodeType {
 				displayOptions: {
 					show: {
 						resource: ['product'],
-						operation: ['create', 'update'],
+						operation: ['create'],
 					},
 				},
 				default: '',
 				description: 'Product description',
+			},
+			{
+				displayName: 'Description',
+				name: 'description',
+				type: 'string',
+				displayOptions: {
+					show: {
+						resource: ['product'],
+						operation: ['update'],
+					},
+				},
+				default: '',
+				description: 'Product description (leave empty to keep current description)',
 			},
 			{
 				displayName: 'Short Description',
@@ -885,11 +1027,24 @@ export class Ikas implements INodeType {
 				displayOptions: {
 					show: {
 						resource: ['product'],
-						operation: ['create', 'update'],
+						operation: ['create'],
 					},
 				},
 				default: 0,
 				description: 'Weight of the product',
+			},
+			{
+				displayName: 'Weight',
+				name: 'weight',
+				type: 'number',
+				displayOptions: {
+					show: {
+						resource: ['product'],
+						operation: ['update'],
+					},
+				},
+				default: null,
+				description: 'Weight of the product (leave empty to keep current weight)',
 			},
 			{
 				displayName: 'Max Quantity Per Cart',
@@ -1039,26 +1194,17 @@ export class Ikas implements INodeType {
 
 						const productIdList = this.getNodeParameter('productIdList', i) as string;
 						if (productIdList) {
-							searchInput.productIdList = productIdList
-								.split(',')
-								.map((id) => id.trim())
-								.filter((id) => id);
+							searchInput.productIdList = productIdList;
 						}
 
 						const skuList = this.getNodeParameter('skuList', i) as string;
 						if (skuList) {
-							searchInput.skuList = skuList
-								.split(',')
-								.map((sku) => sku.trim())
-								.filter((sku) => sku);
+							searchInput.skuList = skuList;
 						}
 
 						const barcodeList = this.getNodeParameter('barcodeList', i) as string;
 						if (barcodeList) {
-							searchInput.barcodeList = barcodeList
-								.split(',')
-								.map((barcode) => barcode.trim())
-								.filter((barcode) => barcode);
+							searchInput.barcodeList = barcodeList;
 						}
 
 						// Handle pagination
@@ -1081,17 +1227,12 @@ export class Ikas implements INodeType {
 						this.logger.info(JSON.stringify(responseData, null, 2), {
 							message: 'Search Products are here',
 						});
-					} else if (operation === 'create' || operation === 'update') {
-						// Build product input
+					} else if (operation === 'create') {
+						// TODO: This only handles simple products not varianted products.
 						const productInput: any = {
 							name: this.getNodeParameter('productName', i) as string,
 							type: this.getNodeParameter('productType', i) as string,
 						};
-
-						// For update operation, include the product ID
-						if (operation === 'update') {
-							productInput.id = this.getNodeParameter('productId', i) as string;
-						}
 
 						// Add optional fields
 						const description = this.getNodeParameter('description', i) as string;
@@ -1153,10 +1294,7 @@ export class Ikas implements INodeType {
 								if (value !== undefined && value !== '') {
 									// Handle comma-separated string fields
 									if (key === 'hiddenSalesChannelIds' || key === 'dynamicPriceListIds') {
-										productInput[key] = value
-											.split(',')
-											.map((id: string) => id.trim())
-											.filter((id: string) => id);
+										productInput[key] = value;
 									}
 									// Handle JSON fields
 									else if (
@@ -1294,6 +1432,173 @@ export class Ikas implements INodeType {
 
 						this.logger.info(JSON.stringify(responseData, null, 2), {
 							message: 'Response data is here',
+						});
+					} else if (operation === 'update') {
+						// TODO: This only handles simple products not varianted products.
+						const productToUpdate = await ikasGraphQLRequest.call(this, GetProductByIdQuery, {
+							id: {
+								eq: this.getNodeParameter('productId', i) as string,
+							},
+						});
+
+						const product = productToUpdate.data?.listProduct.data[0] || {};
+
+						this.logger.info(JSON.stringify(product, null, 2), {
+							message: 'Product is here',
+						});
+
+						const productInput: any = {
+							id: this.getNodeParameter('productId', i) as string,
+							// These are required by IKAS API even for updates
+							name: this.getNodeParameter('productName', i) as string,
+							type: this.getNodeParameter('productType', i) as string,
+						};
+
+						// Add optional fields only if they are provided (not empty/default values)
+						const description = this.getNodeParameter('description', i) as string;
+						if (description && description.trim()) {
+							productInput.description = description;
+						}
+
+						const shortDescription = this.getNodeParameter('shortDescription', i) as string;
+						if (shortDescription && shortDescription.trim()) {
+							productInput.shortDescription = shortDescription;
+						}
+
+						const weight = this.getNodeParameter('weight', i) as number;
+						if (weight !== null) {
+							productInput.weight = weight;
+						}
+
+						const maxQuantityPerCart = this.getNodeParameter('maxQuantityPerCart', i) as number;
+						if (maxQuantityPerCart && maxQuantityPerCart > 0) {
+							productInput.maxQuantityPerCart = maxQuantityPerCart;
+						}
+
+						const salesChannelIds = product.salesChannelIds;
+						if (salesChannelIds && salesChannelIds.length > 0) {
+							productInput.salesChannelIds = salesChannelIds;
+						}
+
+						// Handle variant updates - variants are required by IKAS API even for updates
+						const price = this.getNodeParameter('price', i) as number;
+						const buyPrice = this.getNodeParameter('buyPrice', i) as number;
+						const discountPrice = this.getNodeParameter('discountPrice', i) as number;
+						const sku = this.getNodeParameter('sku', i) as string;
+						const variantId = this.getNodeParameter('variantId', i) as string;
+
+						// Create variant update object - always required by IKAS API
+						const variantUpdate: any = {
+							isActive: true,
+						};
+
+						// Add variant ID if provided (for updating existing variants)
+						if (variantId && variantId.trim()) {
+							variantUpdate.id = variantId;
+						} else {
+							variantUpdate.id = product.variants[0].id;
+						}
+
+						// Handle pricing updates
+						const hasPriceUpdates = price !== null || buyPrice !== null || discountPrice !== null;
+						if (hasPriceUpdates) {
+							const priceData: any = {};
+
+							if (price !== null) {
+								priceData.sellPrice = price;
+							}
+							if (buyPrice !== null) {
+								priceData.buyPrice = buyPrice;
+							}
+							if (discountPrice !== null) {
+								priceData.discountPrice = discountPrice;
+							}
+
+							variantUpdate.prices = [priceData];
+						} else {
+							variantUpdate.prices = product.variants[0].prices;
+						}
+
+						this.logger.info(JSON.stringify(variantUpdate, null, 2), {
+							message: 'Variant update is here',
+						});
+
+						// Add SKU if provided
+						if (sku && sku.trim()) {
+							variantUpdate.sku = sku;
+						}
+
+						// Always include variants array as it's required by IKAS API
+						productInput.variants = [variantUpdate];
+
+						// Remove null values from variant prices
+						if (variantUpdate.prices && variantUpdate.prices[0]) {
+							Object.keys(variantUpdate.prices[0]).forEach((key) => {
+								if (variantUpdate.prices[0][key] === null) {
+									delete variantUpdate.prices[0][key];
+								}
+							});
+						}
+
+						// Handle additional fields - only include non-empty values
+						const additionalFields = this.getNodeParameter('additionalFields', i) as any;
+						if (additionalFields) {
+							Object.keys(additionalFields).forEach((key) => {
+								const value = additionalFields[key];
+								if (value !== undefined && value !== null && value !== '') {
+									// Handle comma-separated string fields
+									if (key === 'hiddenSalesChannelIds' || key === 'dynamicPriceListIds') {
+										productInput[key] = value;
+									}
+									// Handle JSON fields
+									else if (
+										key === 'attributes' ||
+										key === 'baseUnit' ||
+										key === 'translations' ||
+										key === 'metaData'
+									) {
+										try {
+											const parsedValue = JSON.parse(value);
+											// Only include if the parsed JSON is not empty
+											if (
+												Array.isArray(parsedValue)
+													? parsedValue.length > 0
+													: Object.keys(parsedValue).length > 0
+											) {
+												productInput[key] = parsedValue;
+											}
+										} catch (error) {
+											throw new NodeOperationError(
+												this.getNode(),
+												`Invalid JSON in ${key} field: ${(error as Error).message}`,
+												{ itemIndex: i },
+											);
+										}
+									}
+									// Handle regular string fields
+									else {
+										if (typeof value === 'string' && value.trim()) {
+											productInput[key] = value;
+										} else if (typeof value !== 'string') {
+											productInput[key] = value;
+										}
+									}
+								}
+							});
+						}
+
+						const response = await ikasGraphQLRequest.call(this, SaveProductMutation, {
+							input: productInput,
+						});
+
+						this.logger.info(JSON.stringify(response, null, 2), {
+							message: 'Update product response is here',
+						});
+
+						responseData = response.data?.saveProduct || {};
+
+						this.logger.info(JSON.stringify(responseData, null, 2), {
+							message: 'Update response data is here',
 						});
 					} else {
 						throw new NodeOperationError(
