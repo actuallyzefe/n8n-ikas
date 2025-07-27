@@ -1,0 +1,92 @@
+import type { INodeProperties } from 'n8n-workflow';
+
+export const orderFiltersProperty: INodeProperties = {
+	displayName: 'Additional Filters',
+	name: 'additionalFilters',
+	type: 'collection',
+	placeholder: 'Add Filter',
+	default: {},
+	displayOptions: {
+		show: {
+			resource: ['order'],
+			operation: ['getMany'],
+		},
+	},
+	options: [
+		{
+			displayName: 'Customer Email',
+			name: 'customerEmail',
+			type: 'string',
+			default: '',
+			description: 'Filter by customer email',
+		},
+		{
+			displayName: 'Customer ID',
+			name: 'customerId',
+			type: 'string',
+			default: '',
+			description: 'Filter by customer ID',
+		},
+		{
+			displayName: 'Order Number',
+			name: 'orderNumber',
+			type: 'string',
+			default: '',
+			description: 'Filter by order number',
+		},
+		{
+			displayName: 'Order Status',
+			name: 'status',
+			type: 'multiOptions',
+			default: [],
+			description: 'Filter orders by status',
+			options: [
+				{ name: 'Cancelled', value: 'CANCELLED' },
+				{ name: 'Confirmed', value: 'CONFIRMED' },
+				{ name: 'Created', value: 'CREATED' },
+				{ name: 'Fulfilled', value: 'FULFILLED' },
+				{ name: 'Partially Fulfilled', value: 'PARTIALLY_FULFILLED' },
+				{ name: 'Refunded', value: 'REFUNDED' },
+			],
+		},
+		{
+			displayName: 'Package Status',
+			name: 'packageStatus',
+			type: 'multiOptions',
+			default: [],
+			description: 'Filter orders by package status',
+			options: [
+				{ name: 'Cancelled', value: 'CANCELLED' },
+				{ name: 'Delivered', value: 'DELIVERED' },
+				{ name: 'Preparing', value: 'PREPARING' },
+				{ name: 'Ready for Shipment', value: 'READY_FOR_SHIPMENT' },
+				{ name: 'Refunded', value: 'REFUNDED' },
+				{ name: 'Returned', value: 'RETURNED' },
+				{ name: 'Shipped', value: 'SHIPPED' },
+			],
+		},
+		{
+			displayName: 'Payment Status',
+			name: 'paymentStatus',
+			type: 'multiOptions',
+			default: [],
+			description: 'Filter orders by payment status',
+			options: [
+				{ name: 'Cancelled', value: 'CANCELLED' },
+				{ name: 'Failed', value: 'FAILED' },
+				{ name: 'Paid', value: 'PAID' },
+				{ name: 'Partially Paid', value: 'PARTIALLY_PAID' },
+				{ name: 'Partially Refunded', value: 'PARTIALLY_REFUNDED' },
+				{ name: 'Pending', value: 'PENDING' },
+				{ name: 'Refunded', value: 'REFUNDED' },
+			],
+		},
+		{
+			displayName: 'Sales Channel ID',
+			name: 'salesChannelId',
+			type: 'string',
+			default: '',
+			description: 'Filter by sales channel ID',
+		},
+	],
+};
