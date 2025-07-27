@@ -1076,8 +1076,7 @@ export class Ikas implements INodeType {
 					},
 				},
 				default: [],
-				description:
-					'Select the sales channels where this product will be available. Choose from the list.',
+				description: 'Select the sales channels where this product will be available. Choose from the list. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 			},
 
 			{
@@ -1129,7 +1128,7 @@ export class Ikas implements INodeType {
 							loadOptionsMethod: 'getSalesChannels',
 						},
 						default: [],
-						description: 'Select sales channels where this product will be hidden',
+						description: 'Select sales channels where this product will be hidden. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 					},
 					{
 						displayName: 'Meta Data',
