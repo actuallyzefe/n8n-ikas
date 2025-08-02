@@ -184,6 +184,8 @@ export const GetOrdersQuery = `
 					trackingInfo {
 						trackingNumber
 						trackingLink
+						barcode
+						cargoCompany
 					}
 					orderLineItemIds
 					stockLocationId
