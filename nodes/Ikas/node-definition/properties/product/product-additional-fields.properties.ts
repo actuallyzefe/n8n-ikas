@@ -1,7 +1,7 @@
 import type { INodeProperties } from 'n8n-workflow';
 
 export const productAdditionalFieldsProperty: INodeProperties = {
-	displayName: 'Additional Options',
+	displayName: 'Additional Fields',
 	name: 'additionalFields',
 	type: 'collection',
 	placeholder: 'Add Field',
@@ -13,6 +13,142 @@ export const productAdditionalFieldsProperty: INodeProperties = {
 		},
 	},
 	options: [
+		// Pricing fields
+		{
+			displayName: 'Buy Price',
+			name: 'buyPrice',
+			type: 'number',
+			default: '',
+			description: 'Cost/buy price for the simple product',
+			typeOptions: {
+				numberPrecision: 2,
+				minValue: 0,
+			},
+		},
+		{
+			displayName: 'Discount Price',
+			name: 'discountPrice',
+			type: 'number',
+			default: '',
+			description: 'Discount price for the simple product',
+			typeOptions: {
+				numberPrecision: 2,
+				minValue: 0,
+			},
+		},
+		{
+			displayName: 'Price (for Updates)',
+			name: 'price',
+			type: 'number',
+			displayOptions: {
+				show: {
+					'@version': [1, 2, 3, 4, 5], // Always show for collection items
+				},
+				hide: {
+					'/operation': ['create'], // Hide for create operation
+				},
+			},
+			default: '',
+			description: 'Selling price for the simple product (leave empty to keep current price)',
+			typeOptions: {
+				numberPrecision: 2,
+				minValue: 0,
+			},
+		},
+		// Product identification
+		{
+			displayName: 'SKU',
+			name: 'sku',
+			type: 'string',
+			default: '',
+			description: 'SKU for the simple product',
+		},
+		{
+			displayName: 'Variant ID',
+			name: 'variantId',
+			type: 'string',
+			displayOptions: {
+				show: {
+					'@version': [1, 2, 3, 4, 5], // Always show for collection items
+				},
+				hide: {
+					'/operation': ['create'], // Hide for create operation
+				},
+			},
+			default: '',
+			description: 'ID of the variant to update (required for updating pricing/SKU)',
+		},
+		// Stock management
+		{
+			displayName: 'Stock Count',
+			name: 'stockCount',
+			type: 'number',
+			default: 0,
+			description: 'Initial stock count for the simple product',
+			typeOptions: {
+				minValue: 0,
+			},
+		},
+		{
+			displayName: 'Stock Location',
+			name: 'stockLocationId',
+			type: 'options',
+			typeOptions: {
+				loadOptionsMethod: 'getStockLocations',
+			},
+			default: '',
+			description:
+				'Select the stock location where the stock will be stored. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		},
+		// Product descriptions
+		{
+			displayName: 'Description',
+			name: 'description',
+			type: 'string',
+			default: '',
+			description: 'Product description',
+		},
+		{
+			displayName: 'Short Description',
+			name: 'shortDescription',
+			type: 'string',
+			default: '',
+			description: 'Short description of the product',
+		},
+		// Product attributes
+		{
+			displayName: 'Weight',
+			name: 'weight',
+			type: 'number',
+			default: '',
+			description: 'Weight of the product',
+			typeOptions: {
+				minValue: 0,
+			},
+		},
+		{
+			displayName: 'Max Quantity Per Cart',
+			name: 'maxQuantityPerCart',
+			type: 'number',
+			default: 0,
+			description: 'Maximum quantity allowed per cart',
+			typeOptions: {
+				minValue: 0,
+			},
+		},
+		// Hidden sales channels (optional)
+		{
+			displayName: 'Hidden Sales Channels',
+			name: 'hiddenSalesChannelIds',
+			type: 'multiOptions',
+			typeOptions: {
+				loadOptionsMethod: 'getSalesChannels',
+			},
+			default: [],
+			description:
+				'Select sales channels where this product will be hidden. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		},
+		// Advanced options
 		{
 			displayName: 'Base Unit',
 			name: 'baseUnit',
@@ -40,17 +176,6 @@ export const productAdditionalFieldsProperty: INodeProperties = {
 			type: 'string',
 			default: '',
 			description: 'Variant type ID to group variants by',
-		},
-		{
-			displayName: 'Hidden Sales Channels',
-			name: 'hiddenSalesChannelIds',
-			type: 'multiOptions',
-			typeOptions: {
-				loadOptionsMethod: 'getSalesChannels',
-			},
-			default: [],
-			description:
-				'Select sales channels where this product will be hidden. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		},
 		{
 			displayName: 'Meta Data',

@@ -26,7 +26,7 @@ async function fetchExistingProduct(context: IExecuteFunctions, productId: strin
 }
 
 /**
- * Builds the basic product update input
+ * Builds the basic product update input with required fields only
  */
 function buildUpdateProductInput(
 	context: IExecuteFunctions,
@@ -40,27 +40,7 @@ function buildUpdateProductInput(
 		type: context.getNodeParameter('productType', itemIndex) as string,
 	};
 
-	// Add optional fields only if they are provided (not empty/default values)
-	const description = context.getNodeParameter('description', itemIndex) as string;
-	if (description && description.trim()) {
-		productInput.description = description;
-	}
-
-	const shortDescription = context.getNodeParameter('shortDescription', itemIndex) as string;
-	if (shortDescription && shortDescription.trim()) {
-		productInput.shortDescription = shortDescription;
-	}
-
-	const weight = context.getNodeParameter('weight', itemIndex) as number;
-	if (weight !== null) {
-		productInput.weight = weight;
-	}
-
-	const maxQuantityPerCart = context.getNodeParameter('maxQuantityPerCart', itemIndex) as number;
-	if (maxQuantityPerCart && maxQuantityPerCart > 0) {
-		productInput.maxQuantityPerCart = maxQuantityPerCart;
-	}
-
+	// Handle sales channels - required by IKAS API
 	const salesChannelIds = context.getNodeParameter('salesChannelIds', itemIndex) as string[];
 	if (salesChannelIds && salesChannelIds.length > 0) {
 		productInput.salesChannelIds = salesChannelIds;
@@ -80,11 +60,12 @@ function createVariantUpdate(
 	itemIndex: number,
 	existingProduct: any,
 ): any {
-	const price = context.getNodeParameter('price', itemIndex) as number;
-	const buyPrice = context.getNodeParameter('buyPrice', itemIndex) as number;
-	const discountPrice = context.getNodeParameter('discountPrice', itemIndex) as number;
-	const sku = context.getNodeParameter('sku', itemIndex) as string;
-	const variantId = context.getNodeParameter('variantId', itemIndex) as string;
+	const additionalFields = context.getNodeParameter('additionalFields', itemIndex) as any;
+	const price = additionalFields?.price || null;
+	const buyPrice = additionalFields?.buyPrice || null;
+	const discountPrice = additionalFields?.discountPrice || null;
+	const sku = additionalFields?.sku || '';
+	const variantId = additionalFields?.variantId || '';
 
 	// Create variant update object - always required by IKAS API
 	const variantUpdate: any = {
@@ -103,13 +84,13 @@ function createVariantUpdate(
 	if (hasPriceUpdates) {
 		const priceData: any = {};
 
-		if (price !== null) {
+		if (price !== null && price !== '') {
 			priceData.sellPrice = price;
 		}
-		if (buyPrice !== null) {
+		if (buyPrice !== null && buyPrice !== '') {
 			priceData.buyPrice = buyPrice;
 		}
-		if (discountPrice !== null) {
+		if (discountPrice !== null && discountPrice !== '') {
 			priceData.discountPrice = discountPrice;
 		}
 
@@ -157,8 +138,18 @@ function processUpdateAdditionalFields(
 	Object.keys(additionalFields).forEach((key) => {
 		const value = additionalFields[key];
 		if (value !== undefined && value !== null && value !== '') {
-			// Handle array fields that used to be comma-separated strings
-			if (key === 'hiddenSalesChannelIds') {
+			// Skip pricing/variant fields as they're handled separately
+			if (
+				key === 'buyPrice' ||
+				key === 'discountPrice' ||
+				key === 'sku' ||
+				key === 'variantId' ||
+				key === 'price'
+			) {
+				return;
+			}
+			// Handle array fields
+			else if (key === 'hiddenSalesChannelIds') {
 				if (Array.isArray(value) && value.length > 0) {
 					productInput[key] = value;
 				}
@@ -190,6 +181,21 @@ function processUpdateAdditionalFields(
 						`Invalid JSON in ${key} field: ${(error as Error).message}`,
 						{ itemIndex },
 					);
+				}
+			}
+			// Handle other product-level fields that moved to additional
+			else if (
+				key === 'description' ||
+				key === 'shortDescription' ||
+				key === 'weight' ||
+				key === 'maxQuantityPerCart' ||
+				key === 'stockLocationId' ||
+				key === 'stockCount'
+			) {
+				if (typeof value === 'string' && value.trim()) {
+					productInput[key] = value;
+				} else if (typeof value !== 'string' && value !== null) {
+					productInput[key] = value;
 				}
 			}
 			// Handle regular string fields

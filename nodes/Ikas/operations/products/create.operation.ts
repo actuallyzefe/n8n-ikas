@@ -7,7 +7,7 @@ import { GetStockLocationsQuery } from '../../graphql/queries/GetStockLocations'
 import { SaveStockLocationsMutation } from '../../graphql/mutations/SaveStockLocations';
 
 /**
- * Builds the basic product input object with required and optional fields
+ * Builds the basic product input object with required fields only
  */
 function buildBasicProductInput(context: IExecuteFunctions, itemIndex: number): any {
 	const productInput: any = {
@@ -15,27 +15,7 @@ function buildBasicProductInput(context: IExecuteFunctions, itemIndex: number): 
 		type: context.getNodeParameter('productType', itemIndex) as string,
 	};
 
-	// Add optional fields
-	const description = context.getNodeParameter('description', itemIndex) as string;
-	if (description) {
-		productInput.description = description;
-	}
-
-	const shortDescription = context.getNodeParameter('shortDescription', itemIndex) as string;
-	if (shortDescription) {
-		productInput.shortDescription = shortDescription;
-	}
-
-	const weight = context.getNodeParameter('weight', itemIndex) as number;
-	if (weight) {
-		productInput.weight = weight;
-	}
-
-	const maxQuantityPerCart = context.getNodeParameter('maxQuantityPerCart', itemIndex) as number;
-	if (maxQuantityPerCart) {
-		productInput.maxQuantityPerCart = maxQuantityPerCart;
-	}
-
+	// Add required sales channels
 	const salesChannelIds = context.getNodeParameter('salesChannelIds', itemIndex) as string[];
 	if (salesChannelIds && salesChannelIds.length > 0) {
 		productInput.salesChannelIds = salesChannelIds;
@@ -49,17 +29,19 @@ function buildBasicProductInput(context: IExecuteFunctions, itemIndex: number): 
  */
 function createDefaultVariant(context: IExecuteFunctions, itemIndex: number): any {
 	const price = context.getNodeParameter('price', itemIndex) as number;
-	const buyPrice = context.getNodeParameter('buyPrice', itemIndex) as number;
-	const discountPrice = context.getNodeParameter('discountPrice', itemIndex) as number;
-	const sku = context.getNodeParameter('sku', itemIndex) as string;
+	const additionalFields = context.getNodeParameter('additionalFields', itemIndex) as any;
+
+	const buyPrice = additionalFields?.buyPrice || 0;
+	const discountPrice = additionalFields?.discountPrice || null;
+	const sku = additionalFields?.sku || '';
 
 	const defaultVariant: any = {
 		isActive: true,
 		prices: [
 			{
 				sellPrice: price || 0,
-				buyPrice: buyPrice || 0,
-				discountPrice: discountPrice || null,
+				buyPrice: buyPrice,
+				discountPrice: discountPrice,
 			},
 		],
 	};
@@ -86,8 +68,12 @@ function processAdditionalFields(
 	Object.keys(additionalFields).forEach((key) => {
 		const value = additionalFields[key];
 		if (value !== undefined && value !== '') {
-			// Handle array fields that used to be comma-separated strings
-			if (key === 'hiddenSalesChannelIds') {
+			// Skip pricing fields as they're handled separately in variant creation
+			if (key === 'buyPrice' || key === 'discountPrice' || key === 'sku') {
+				return;
+			}
+			// Handle array fields
+			else if (key === 'hiddenSalesChannelIds') {
 				if (Array.isArray(value) && value.length > 0) {
 					productInput[key] = value;
 				}
@@ -111,6 +97,19 @@ function processAdditionalFields(
 						`Invalid JSON in ${key} field: ${(error as Error).message}`,
 						{ itemIndex },
 					);
+				}
+			}
+			// Handle other product-level fields
+			else if (
+				key === 'description' ||
+				key === 'shortDescription' ||
+				key === 'weight' ||
+				key === 'maxQuantityPerCart' ||
+				key === 'stockLocationId' ||
+				key === 'stockCount'
+			) {
+				if (value !== null && value !== '') {
+					productInput[key] = value;
 				}
 			}
 			// Handle regular string fields
@@ -277,8 +276,9 @@ export async function createProduct(this: IExecuteFunctions, itemIndex: number):
 	let responseData = response.data?.saveProduct || {};
 
 	// Handle stock management after product creation
-	const stockCount = this.getNodeParameter('stockCount', itemIndex) as number;
-	const stockLocationId = this.getNodeParameter('stockLocationId', itemIndex) as string;
+	const additionalFields = this.getNodeParameter('additionalFields', itemIndex) as any;
+	const stockCount = additionalFields?.stockCount || 0;
+	const stockLocationId = additionalFields?.stockLocationId || '';
 
 	await handleStockManagement(this, responseData, stockCount, stockLocationId);
 
