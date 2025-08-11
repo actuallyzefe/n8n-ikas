@@ -175,27 +175,6 @@ Schedule Trigger → IKAS (Get Products) → Check Stock Levels → IKAS (Update
 
 This workflow runs daily to check stock levels and update products with low inventory alerts.
 
-### 📸 Screenshots
-
-<details>
-<summary>Click to see IKAS node in n8n interface</summary>
-
-<!-- Add your screenshots here -->
-<!-- ![IKAS Node Configuration](./assets/node-config.png) -->
-<!-- ![IKAS Node Workflow](./assets/workflow-example.png) -->
-
-> **📷 How to Add Screenshots**: 
-> 1. Take screenshots of the IKAS node in n8n's interface
-> 2. Save them in the `assets` folder (e.g., `node-config.png`, `workflow-example.png`)
-> 3. Uncomment and update the image references above
-> 
-> **Recommended Screenshots:**
-> - Node configuration panel
-> - Example workflow with IKAS node
-> - Node execution results
-> - Credentials setup screen
-
-</details>
 
 ### Product Operations
 
