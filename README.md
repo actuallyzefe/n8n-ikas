@@ -1,18 +1,46 @@
 # n8n-nodes-ikas
 
-This is an n8n community node. It lets you use IKAS e-commerce platform in your n8n workflows.
+<div align="center">
+  <img src="https://raw.githubusercontent.com/n8n-io/n8n/master/assets/n8n-logo.png" alt="n8n" width="120" height="120">
+  <span style="font-size: 50px; margin: 0 20px;">+</span>
+  <img src="https://ikas.com/favicon.ico" alt="IKAS" width="120" height="120">
+</div>
 
-IKAS is a comprehensive e-commerce platform that provides merchants with tools to create, manage, and grow their online stores. This node enables seamless integration with IKAS's GraphQL API for automating e-commerce operations.
+<div align="center">
+  
+![n8n.io - IKAS](https://img.shields.io/badge/n8n.io-IKAS-blue.svg)
+![Version](https://img.shields.io/npm/v/n8n-nodes-ikas.svg)
+![Downloads](https://img.shields.io/npm/dt/n8n-nodes-ikas.svg)
+![License](https://img.shields.io/npm/l/n8n-nodes-ikas.svg)
+
+</div>
+
+This is an n8n community node that lets you integrate the [IKAS e-commerce platform](https://ikas.com) into your n8n workflows. Automate your e-commerce operations with comprehensive product management, order processing, and inventory control.
+
+## What is IKAS?
+
+IKAS is a comprehensive e-commerce platform that provides merchants with tools to create, manage, and grow their online stores. This node enables seamless integration with IKAS's GraphQL API for automating e-commerce operations including:
+
+- Product catalog management
+- Order processing and fulfillment
+- Inventory and stock management
+- Customer data handling
+- Sales analytics and reporting
 
 [n8n](https://n8n.io/) is a [fair-code licensed](https://docs.n8n.io/reference/license/) workflow automation platform.
 
-[Installation](#installation)  
-[Operations](#operations)  
-[Credentials](#credentials)  
-[Compatibility](#compatibility)  
-[Usage](#usage)  
-[Resources](#resources)  
-[Version history](#version-history)
+## Table of Contents
+
+- [Installation](#installation)
+- [Credentials](#credentials)
+- [Operations](#operations)
+- [Usage Examples](#usage-examples)
+- [Compatibility](#compatibility)
+- [Contributing](#contributing)
+- [Development Setup](#development-setup)
+- [Resources](#resources)
+- [Version History](#version-history)
+- [License](#license)
 
 ## Installation
 
@@ -112,7 +140,62 @@ The node will automatically handle OAuth2 authentication and session token manag
 
 This node uses the IKAS GraphQL API v1 and should be compatible with all current IKAS store configurations.
 
-## Usage
+## Usage Examples
+
+### Quick Start
+
+1. Install the node using n8n's community node installation process
+2. Set up your IKAS API credentials
+3. Create a new workflow and add the IKAS node
+4. Configure your desired operation (Product or Order management)
+
+### Workflow Examples
+
+#### Example 1: Sync Products from External Source
+
+```
+Webhook → Data Processing → IKAS (Create Product) → Email Notification
+```
+
+This workflow listens for new product data, processes it, creates the product in IKAS, and sends a confirmation email.
+
+#### Example 2: Order Fulfillment Automation
+
+```
+IKAS (Get Orders) → Filter (Paid Orders) → IKAS (Fulfill Order) → Send Tracking Email
+```
+
+This workflow automatically fulfills paid orders and sends tracking information to customers.
+
+#### Example 3: Inventory Management
+
+```
+Schedule Trigger → IKAS (Get Products) → Check Stock Levels → IKAS (Update Product) → Slack Notification
+```
+
+This workflow runs daily to check stock levels and update products with low inventory alerts.
+
+### 📸 Screenshots
+
+<details>
+<summary>Click to see IKAS node in n8n interface</summary>
+
+<!-- Add your screenshots here -->
+<!-- ![IKAS Node Configuration](./assets/node-config.png) -->
+<!-- ![IKAS Node Workflow](./assets/workflow-example.png) -->
+
+> **📷 How to Add Screenshots**: 
+> 1. Take screenshots of the IKAS node in n8n's interface
+> 2. Save them in the `assets` folder (e.g., `node-config.png`, `workflow-example.png`)
+> 3. Uncomment and update the image references above
+> 
+> **Recommended Screenshots:**
+> - Node configuration panel
+> - Example workflow with IKAS node
+> - Node execution results
+> - Credentials setup screen
+
+</details>
 
 ### Product Operations
 
@@ -162,20 +245,130 @@ This node uses the IKAS GraphQL API v1 and should be compatible with all current
 - Handle error states with custom error messages
 - Include source IDs for external system integration
 
+## Contributing
+
+We welcome contributions from the community! Whether you're fixing bugs, adding features, or improving documentation, your help is appreciated.
+
+### How to Contribute
+
+1. **Fork the Repository**: Click the "Fork" button on GitHub to create your own copy
+2. **Clone Your Fork**: `git clone https://github.com/YOUR_USERNAME/n8n-ikas.git`
+3. **Create a Branch**: `git checkout -b feature/your-feature-name`
+4. **Make Your Changes**: Implement your feature or fix
+5. **Test Your Changes**: Ensure everything works correctly
+6. **Commit Your Changes**: `git commit -am 'Add some feature'`
+7. **Push to Your Branch**: `git push origin feature/your-feature-name`
+8. **Create a Pull Request**: Submit your changes for review
+
+
+### Code Standards
+
+- Follow the existing TypeScript code style
+- Use meaningful variable and function names
+- Add JSDoc comments for new functions
+- Ensure all new code is properly typed
+
+### Reporting Issues
+
+Found a bug or have a feature request? Please check existing issues first, then create a new issue with:
+
+- Clear description of the problem or request
+- Steps to reproduce (for bugs)
+- Expected vs actual behavior
+- Your environment details (n8n version, Node.js version, etc.)
+
+
+## Development Setup
+
+### Prerequisites
+
+- Node.js >=22.16
+- n8n (for testing)
+
+### Setup Instructions
+
+1. **Clone the Repository**
+   ```bash
+   git clone https://github.com/actuallyzefe/n8n-ikas.git
+   cd n8n-ikas
+   ```
+
+2. **Install Dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Build the Project**
+   ```bash
+   npm run build
+   ```
+
+4. **Development Mode** (watches for changes)
+   ```bash
+   npm run dev
+   ```
+
+5. **Linting and Formatting**
+   ```bash
+   npm run lint        # Check for linting issues
+   npm run lintfix     # Fix auto-fixable issues
+   npm run format      # Format code with prettier
+   ```
+
+### Project Structure
+
+```
+├── credentials/           # Authentication credential definitions
+├── nodes/
+│   └── Ikas/
+│       ├── Ikas.node.ts  # Main node implementation
+│       ├── GenericFunctions.ts # Shared utilities
+│       ├── graphql/      # GraphQL queries and mutations
+│       ├── node-definition/ # Node property definitions
+│       ├── operations/   # Operation implementations
+│       └── types/        # TypeScript type definitions
+├── gulpfile.js          # Build configuration
+└── package.json         # Project configuration
+```
+
+### Testing Your Changes
+
+1. Build the project: `npm run build`
+2. Link to n8n: Follow [n8n's community node development guide](https://docs.n8n.io/integrations/community-nodes/creating-nodes/)
+3. Test your changes in n8n workflows
+4. Verify all operations work as expected
+
 ## Resources
 
-- [n8n community nodes documentation](https://docs.n8n.io/integrations/#community-nodes)
+- [n8n Community Nodes Documentation](https://docs.n8n.io/integrations/#community-nodes)
+- [n8n Node Development Guide](https://docs.n8n.io/integrations/community-nodes/creating-nodes/)
 - [IKAS API Documentation](https://ikas.dev/docs/intro)
 - [IKAS Authentication Guide](https://ikas.dev/docs/api/getting-started/authentication)
 - [IKAS Developer Portal](https://ikas.dev/)
+- [GraphQL Best Practices](https://graphql.org/learn/best-practices/)
 
-## Version history
+## Version History
 
-### 0.1.0
+### 0.1.13 (Current)
+- Enhanced order package status updates
+- Improved error handling and logging
+- Better TypeScript type definitions
+- Updated documentation
 
-- Initial release
-- Support for Product operations (Get Many, Search, Create, Update)
-- Support for Order operations (Get Many)
-- OAuth2 authentication with automatic session management
-- GraphQL API integration
-- Full TypeScript support
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+
+## Acknowledgments
+
+- Thanks to the [n8n team](https://n8n.io/) for creating an amazing workflow automation platform
+- Thanks to [IKAS](https://ikas.com) for providing a comprehensive e-commerce platform
+- Thanks to all contributors who help improve this node
+
+---
+
+**Need Help?** 
+- Check out the [Issues](https://github.com/actuallyzefe/n8n-ikas/issues) for common problems
+- Create a new issue if you can't find a solution
+- Join the [n8n community](https://community.n8n.io/) for general n8n support
