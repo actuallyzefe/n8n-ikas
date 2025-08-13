@@ -3,9 +3,10 @@ import { NodeOperationError } from 'n8n-workflow';
 
 import { ikasGraphQLRequest } from '../../GenericFunctions';
 import { DeleteOrderListMutation } from '../../graphql/mutations/DeleteOrderList';
+import { ArrayHelper } from '../../utils/ArrayHelper';
 
 /**
- * Deletes multiple product order lists by their IDs
+ * Deletes multiple orders by their IDs
  */
 export async function deleteProductOrderList(this: IExecuteFunctions, itemIndex: number): Promise<any> {
 	try {
@@ -13,10 +14,7 @@ export async function deleteProductOrderList(this: IExecuteFunctions, itemIndex:
 		const orderListIdsParam = this.getNodeParameter('orderListIds', itemIndex) as any;
 		
 		// Extract order list IDs from the fixedCollection structure
-		let orderListIds: string[] = [];
-		if (orderListIdsParam && orderListIdsParam.orderListIds && Array.isArray(orderListIdsParam.orderListIds)) {
-			orderListIds = orderListIdsParam.orderListIds.map((item: any) => item.orderListId).filter((id: string) => id && id.trim() !== '');
-		}
+		const orderListIds = ArrayHelper.extractValidIds(orderListIdsParam, 'orderListIds', 'id');
 
 		if (orderListIds.length === 0) {
 			throw new NodeOperationError(

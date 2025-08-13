@@ -33,7 +33,7 @@ export const orderOperationProperty: INodeProperties = {
 			name: 'Delete Product Orders',
 			value: 'deleteOrderList',
 			description: 'Delete multiple product orders',
-			action: 'Delete product order lists',
+			action: 'Delete product orders',
 		},
 	],
 	default: 'getMany',

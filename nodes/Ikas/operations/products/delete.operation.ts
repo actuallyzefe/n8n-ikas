@@ -2,7 +2,8 @@ import type { IExecuteFunctions } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
 
 import { ikasGraphQLRequest } from '../../GenericFunctions';
-import { DeleteProductListMutation } from '../../graphql/mutations/DeleteProductList';
+import { DeleteProductListMutation } from '../../graphql/mutations/DeleteProducts';
+import { ArrayHelper } from '../../utils/ArrayHelper';
 /**
  * Deletes multiple products by their IDs
  */
@@ -12,10 +13,7 @@ export async function deleteProducts(this: IExecuteFunctions, itemIndex: number)
 		const productIdsParam = this.getNodeParameter('productIds', itemIndex) as any;
 		
 		// Extract product IDs from the fixedCollection structure
-		let productIds: string[] = [];
-		if (productIdsParam && productIdsParam.productIds && Array.isArray(productIdsParam.productIds)) {
-			productIds = productIdsParam.productIds.map((item: any) => item.productId).filter((id: string) => id && id.trim() !== '');
-		}
+		const productIds = ArrayHelper.extractValidIds(productIdsParam, 'productIds', 'id');
 
 		if (productIds.length === 0) {
 			throw new NodeOperationError(
@@ -29,29 +27,37 @@ export async function deleteProducts(this: IExecuteFunctions, itemIndex: number)
 			productIds,
 		});
 
-		// Execute the delete mutation (returns boolean)
+		// Prepare the input for the GraphQL mutation
+		const input = {
+			productIds: productIds,
+		};
+
+		// Execute the delete mutation
 		const response = await ikasGraphQLRequest.call(this, DeleteProductListMutation, {
-			idList: productIds,
+			input,
 		});
 
 		this.logger.info(JSON.stringify(response, null, 2), {
 			message: 'Delete products response',
 		});
 
-		const success: boolean = response.data?.deleteProductList === true;
+		const responseData = response.data?.deleteProducts || {};
 
-		if (!success) {
+		// Check if the deletion was successful
+		if (!responseData.success) {
 			throw new NodeOperationError(
 				this.getNode(),
-				'Failed to delete products',
+				`Failed to delete products: ${JSON.stringify(responseData.errors)}`,
 				{ itemIndex },
 			);
 		}
 
 		// Return the deletion result
 		return {
-			success: true,
-			deletedIds: productIds,
+			success: responseData.success,
+			deletedCount: responseData.deletedCount || 0,
+			errors: responseData.errors || [],
+			productIds: productIds,
 		};
 	} catch (error) {
 		this.logger.error(JSON.stringify(error, null, 2), {

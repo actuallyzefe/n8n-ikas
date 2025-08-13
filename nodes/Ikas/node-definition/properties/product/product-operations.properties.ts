@@ -18,7 +18,7 @@ export const productOperationProperty: INodeProperties = {
 			action: 'Create a product',
 		},
 		{
-			name: 'Delete Products',
+			name: 'Delete',
 			value: 'delete',
 			description: 'Delete multiple products',
 			action: 'Delete products',
