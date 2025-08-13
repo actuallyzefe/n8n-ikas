@@ -30,9 +30,9 @@ export const orderOperationProperty: INodeProperties = {
 			action: 'Update package status',
 		},
 		{
-			name: 'Delete Product Order Lists',
+			name: 'Delete Product Orders',
 			value: 'deleteOrderList',
-			description: 'Delete product order lists',
+			description: 'Delete multiple product orders',
 			action: 'Delete product order lists',
 		},
 	],
