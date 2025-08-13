@@ -21,8 +21,9 @@ export const customerFiltersProperty: INodeProperties = {
 			description: 'Filter customers by account status',
 			options: [
 				{ name: 'Active Account', value: 'ACTIVE_ACCOUNT' },
-				{ name: 'Inactive Account', value: 'INACTIVE_ACCOUNT' },
+				{ name: 'Declined Account Invitation', value: 'DECLINED_ACCOUNT_INVITATION' },
 				{ name: 'Disabled Account', value: 'DISABLED_ACCOUNT' },
+				{ name: 'Invited to Create Account', value: 'INVITED_TO_CREATE_ACCOUNT' },
 			],
 		},
 		{
@@ -49,7 +50,7 @@ export const customerFiltersProperty: INodeProperties = {
 			options: [
 				{ name: 'Subscribed', value: 'SUBSCRIBED' },
 				{ name: 'Not Subscribed', value: 'NOT_SUBSCRIBED' },
-				{ name: 'Unsubscribed', value: 'UNSUBSCRIBED' },
+				{ name: 'Pending Confirmation', value: 'PENDING_CONFIRMATION' },
 			],
 		},
 		{
@@ -80,10 +81,11 @@ export const customerFiltersProperty: INodeProperties = {
 			default: [],
 			description: 'Filter customers by registration source',
 			options: [
-				{ name: 'Storefront', value: 'STOREFRONT' },
-				{ name: 'Admin Panel', value: 'ADMIN_PANEL' },
-				{ name: 'API', value: 'API' },
-				{ name: 'Import', value: 'IMPORT' },
+				{ name: 'Apple', value: 'apple' },
+				{ name: 'Credentials', value: 'credentials' },
+				{ name: 'Facebook', value: 'facebook' },
+				{ name: 'Google', value: 'google' },
+				{ name: 'Twitch', value: 'twitch' },
 			],
 		},
 		{

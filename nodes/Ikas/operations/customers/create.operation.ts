@@ -3,6 +3,7 @@ import { NodeOperationError } from 'n8n-workflow';
 
 import { ikasGraphQLRequest } from '../../GenericFunctions';
 import { SaveCustomerMutation } from '../../graphql/mutations/SaveCustomer';
+import type { CustomerInput } from '../../types/customer.types';
 
 /**
  * Builds the basic customer input object with required fields only
@@ -10,8 +11,8 @@ import { SaveCustomerMutation } from '../../graphql/mutations/SaveCustomer';
 function buildBasicCustomerInput(
 	context: IExecuteFunctions,
 	itemIndex: number,
-): Record<string, unknown> {
-	const customerInput: Record<string, unknown> = {
+): Partial<CustomerInput> {
+	const customerInput: Partial<CustomerInput> = {
 		firstName: context.getNodeParameter('firstName', itemIndex) as string,
 	};
 
@@ -40,7 +41,7 @@ function buildBasicCustomerInput(
 function processAdditionalFields(
 	context: IExecuteFunctions,
 	itemIndex: number,
-	customerInput: Record<string, unknown>,
+	customerInput: Partial<CustomerInput>,
 ): void {
 	const additionalFields = context.getNodeParameter('additionalFields', itemIndex) as Record<
 		string,
@@ -53,7 +54,17 @@ function processAdditionalFields(
 
 	// Account Status
 	if (additionalFields.accountStatus) {
-		customerInput.accountStatus = additionalFields.accountStatus;
+		customerInput.accountStatus = additionalFields.accountStatus as CustomerInput['accountStatus'];
+	}
+
+	// B2B Status
+	if (additionalFields.b2bStatus) {
+		customerInput.b2bStatus = additionalFields.b2bStatus as CustomerInput['b2bStatus'];
+	}
+
+	// Birth Date
+	if (additionalFields.birthDate) {
+		customerInput.birthDate = new Date(additionalFields.birthDate as string).getTime();
 	}
 
 	// Customer Group IDs
@@ -69,27 +80,51 @@ function processAdditionalFields(
 
 	// Email Subscription Status
 	if (additionalFields.subscriptionStatus) {
-		customerInput.subscriptionStatus = additionalFields.subscriptionStatus;
+		customerInput.subscriptionStatus =
+			additionalFields.subscriptionStatus as CustomerInput['subscriptionStatus'];
+	}
+
+	// Full Name
+	if (additionalFields.fullName) {
+		customerInput.fullName = additionalFields.fullName as string;
+	}
+
+	// Gender
+	if (additionalFields.gender) {
+		customerInput.gender = additionalFields.gender as CustomerInput['gender'];
 	}
 
 	// Note
 	if (additionalFields.note) {
-		customerInput.note = additionalFields.note;
+		customerInput.note = additionalFields.note as string;
+	}
+
+	// Phone Subscription Status
+	if (additionalFields.phoneSubscriptionStatus) {
+		customerInput.phoneSubscriptionStatus =
+			additionalFields.phoneSubscriptionStatus as CustomerInput['phoneSubscriptionStatus'];
 	}
 
 	// Preferred Language
 	if (additionalFields.preferredLanguage) {
-		customerInput.preferredLanguage = additionalFields.preferredLanguage;
+		customerInput.preferredLanguage = additionalFields.preferredLanguage as string;
 	}
 
 	// Price List ID
 	if (additionalFields.priceListId) {
-		customerInput.priceListId = additionalFields.priceListId;
+		customerInput.priceListId = additionalFields.priceListId as string;
 	}
 
 	// Registration Source
 	if (additionalFields.registrationSource) {
-		customerInput.registrationSource = additionalFields.registrationSource;
+		customerInput.registrationSource =
+			additionalFields.registrationSource as CustomerInput['registrationSource'];
+	}
+
+	// SMS Subscription Status
+	if (additionalFields.smsSubscriptionStatus) {
+		customerInput.smsSubscriptionStatus =
+			additionalFields.smsSubscriptionStatus as CustomerInput['smsSubscriptionStatus'];
 	}
 
 	// Tag IDs

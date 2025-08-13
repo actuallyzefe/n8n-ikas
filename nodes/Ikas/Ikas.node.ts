@@ -19,7 +19,7 @@ import {
 	searchProducts,
 } from './operations/products';
 import { getManyOrders, fulfillOrder, updateOrderPackageStatus } from './operations/orders';
-import { createCustomer, getManyCustomers, updateCustomer } from './operations/customers';
+import { createCustomer, updateCustomer, getManyCustomers } from './operations/customers';
 
 export class Ikas implements INodeType {
 	description: INodeTypeDescription = {

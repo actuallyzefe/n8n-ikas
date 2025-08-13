@@ -97,9 +97,28 @@ export const customerCreateUpdateProperties: INodeProperties[] = [
 				description: 'Account status of the customer',
 				options: [
 					{ name: 'Active Account', value: 'ACTIVE_ACCOUNT' },
-					{ name: 'Inactive Account', value: 'INACTIVE_ACCOUNT' },
+					{ name: 'Declined Account Invitation', value: 'DECLINED_ACCOUNT_INVITATION' },
 					{ name: 'Disabled Account', value: 'DISABLED_ACCOUNT' },
+					{ name: 'Invited to Create Account', value: 'INVITED_TO_CREATE_ACCOUNT' },
 				],
+			},
+			{
+				displayName: 'B2B Status',
+				name: 'b2bStatus',
+				type: 'options',
+				default: 'B2C',
+				description: 'B2B status of the customer',
+				options: [
+					{ name: 'B2B', value: 'B2B' },
+					{ name: 'B2C', value: 'B2C' },
+				],
+			},
+			{
+				displayName: 'Birth Date',
+				name: 'birthDate',
+				type: 'dateTime',
+				default: '',
+				description: 'Birth date of the customer',
 			},
 			{
 				displayName: 'Customer Group IDs',
@@ -117,7 +136,26 @@ export const customerCreateUpdateProperties: INodeProperties[] = [
 				options: [
 					{ name: 'Subscribed', value: 'SUBSCRIBED' },
 					{ name: 'Not Subscribed', value: 'NOT_SUBSCRIBED' },
-					{ name: 'Unsubscribed', value: 'UNSUBSCRIBED' },
+					{ name: 'Pending Confirmation', value: 'PENDING_CONFIRMATION' },
+				],
+			},
+			{
+				displayName: 'Full Name',
+				name: 'fullName',
+				type: 'string',
+				default: '',
+				description: 'Full name of the customer (overrides firstName + lastName combination)',
+			},
+			{
+				displayName: 'Gender',
+				name: 'gender',
+				type: 'options',
+				default: 'OTHER',
+				description: 'Gender of the customer',
+				options: [
+					{ name: 'Male', value: 'MALE' },
+					{ name: 'Female', value: 'FEMALE' },
+					{ name: 'Other', value: 'OTHER' },
 				],
 			},
 			{
@@ -129,6 +167,18 @@ export const customerCreateUpdateProperties: INodeProperties[] = [
 				typeOptions: {
 					rows: 3,
 				},
+			},
+			{
+				displayName: 'Phone Subscription Status',
+				name: 'phoneSubscriptionStatus',
+				type: 'options',
+				default: 'NOT_SUBSCRIBED',
+				description: 'Phone subscription status for the customer',
+				options: [
+					{ name: 'Subscribed', value: 'SUBSCRIBED' },
+					{ name: 'Not Subscribed', value: 'NOT_SUBSCRIBED' },
+					{ name: 'Pending Confirmation', value: 'PENDING_CONFIRMATION' },
+				],
 			},
 			{
 				displayName: 'Preferred Language',
@@ -149,13 +199,26 @@ export const customerCreateUpdateProperties: INodeProperties[] = [
 				displayName: 'Registration Source',
 				name: 'registrationSource',
 				type: 'options',
-				default: 'STOREFRONT',
+				default: 'credentials',
 				description: 'Source of customer registration',
 				options: [
-					{ name: 'Storefront', value: 'STOREFRONT' },
-					{ name: 'Admin Panel', value: 'ADMIN_PANEL' },
-					{ name: 'API', value: 'API' },
-					{ name: 'Import', value: 'IMPORT' },
+					{ name: 'Apple', value: 'apple' },
+					{ name: 'Credentials', value: 'credentials' },
+					{ name: 'Facebook', value: 'facebook' },
+					{ name: 'Google', value: 'google' },
+					{ name: 'Twitch', value: 'twitch' },
+				],
+			},
+			{
+				displayName: 'SMS Subscription Status',
+				name: 'smsSubscriptionStatus',
+				type: 'options',
+				default: 'NOT_SUBSCRIBED',
+				description: 'SMS subscription status for the customer',
+				options: [
+					{ name: 'Subscribed', value: 'SUBSCRIBED' },
+					{ name: 'Not Subscribed', value: 'NOT_SUBSCRIBED' },
+					{ name: 'Pending Confirmation', value: 'PENDING_CONFIRMATION' },
 				],
 			},
 			{
