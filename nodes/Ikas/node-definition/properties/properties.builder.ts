@@ -10,6 +10,7 @@ import {
 	orderFulfillProperties,
 	orderPackageStatusProperties,
 } from './index';
+import { customerOperationProperty } from './customer';
 
 /**
  * Builds the complete properties array for the IKAS node
@@ -23,6 +24,7 @@ export function buildNodeProperties(): INodeProperties[] {
 		// Operations
 		productOperationProperty,
 		orderOperationProperty,
+		customerOperationProperty,
 
 		// Order-specific properties
 		orderFiltersProperty,
@@ -33,6 +35,8 @@ export function buildNodeProperties(): INodeProperties[] {
 		...productSearchProperties,
 		...productCreateUpdateProperties,
 		productAdditionalFieldsProperty,
+
+		// Customer-specific properties
 	];
 }
 
@@ -43,7 +47,11 @@ export function buildNodeProperties(): INodeProperties[] {
 export function buildNodePropertiesGrouped(): INodeProperties[] {
 	const baseProperties: INodeProperties[] = [resourceProperty];
 
-	const operationProperties: INodeProperties[] = [productOperationProperty, orderOperationProperty];
+	const operationProperties: INodeProperties[] = [
+		productOperationProperty,
+		orderOperationProperty,
+		customerOperationProperty,
+	];
 
 	const orderProperties: INodeProperties[] = [
 		orderFiltersProperty,
