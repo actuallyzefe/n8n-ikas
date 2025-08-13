@@ -19,6 +19,7 @@ import {
 	searchProducts,
 } from './operations/products';
 import { getManyOrders, fulfillOrder, updateOrderPackageStatus } from './operations/orders';
+import { createCustomer, getManyCustomers, updateCustomer } from './operations/customers';
 
 export class Ikas implements INodeType {
 	description: INodeTypeDescription = {
@@ -112,6 +113,11 @@ export class Ikas implements INodeType {
 			try {
 				// Define operation handlers for each resource
 				const resourceHandlers = {
+					customer: {
+						getMany: getManyCustomers,
+						create: createCustomer,
+						update: updateCustomer,
+					},
 					product: {
 						getMany: getManyProducts,
 						search: searchProducts,
@@ -165,7 +171,23 @@ export class Ikas implements INodeType {
 				// Handle different response structures
 				let dataToReturn: any[] = [];
 
-				if (resource === 'order' && operation === 'getMany') {
+				if (resource === 'customer' && operation === 'getMany') {
+					// For customers, extract the data array and include pagination info
+					const customers = responseData.data || [];
+					const paging = {
+						page: responseData.page,
+						limit: responseData.limit,
+						count: responseData.count,
+					};
+
+					dataToReturn = customers.map((customer: any) => ({
+						...customer,
+						_pagination: paging,
+					}));
+				} else if (resource === 'customer' && (operation === 'create' || operation === 'update')) {
+					// For create/update customer, return the customer object
+					dataToReturn = [responseData || {}];
+				} else if (resource === 'order' && operation === 'getMany') {
 					// For orders, extract the data array and include pagination info
 					const orders = responseData.data || [];
 					const paging = {

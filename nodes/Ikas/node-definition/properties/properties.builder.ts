@@ -1,6 +1,9 @@
 import type { INodeProperties } from 'n8n-workflow';
 import {
 	resourceProperty,
+	customerOperationProperty,
+	customerCreateUpdateProperties,
+	customerFiltersProperty,
 	productOperationProperty,
 	productSearchProperties,
 	productCreateUpdateProperties,
@@ -10,7 +13,6 @@ import {
 	orderFulfillProperties,
 	orderPackageStatusProperties,
 } from './index';
-import { customerOperationProperty } from './customer';
 
 /**
  * Builds the complete properties array for the IKAS node
@@ -22,9 +24,13 @@ export function buildNodeProperties(): INodeProperties[] {
 		resourceProperty,
 
 		// Operations
+		customerOperationProperty,
 		productOperationProperty,
 		orderOperationProperty,
-		customerOperationProperty,
+
+		// Customer-specific properties
+		...customerCreateUpdateProperties,
+		customerFiltersProperty,
 
 		// Order-specific properties
 		orderFiltersProperty,
@@ -35,8 +41,6 @@ export function buildNodeProperties(): INodeProperties[] {
 		...productSearchProperties,
 		...productCreateUpdateProperties,
 		productAdditionalFieldsProperty,
-
-		// Customer-specific properties
 	];
 }
 
@@ -48,9 +52,14 @@ export function buildNodePropertiesGrouped(): INodeProperties[] {
 	const baseProperties: INodeProperties[] = [resourceProperty];
 
 	const operationProperties: INodeProperties[] = [
+		customerOperationProperty,
 		productOperationProperty,
 		orderOperationProperty,
-		customerOperationProperty,
+	];
+
+	const customerProperties: INodeProperties[] = [
+		...customerCreateUpdateProperties,
+		customerFiltersProperty,
 	];
 
 	const orderProperties: INodeProperties[] = [
@@ -65,5 +74,11 @@ export function buildNodePropertiesGrouped(): INodeProperties[] {
 		productAdditionalFieldsProperty,
 	];
 
-	return [...baseProperties, ...operationProperties, ...orderProperties, ...productProperties];
+	return [
+		...baseProperties,
+		...operationProperties,
+		...customerProperties,
+		...orderProperties,
+		...productProperties,
+	];
 }

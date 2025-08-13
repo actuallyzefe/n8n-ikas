@@ -1,0 +1,138 @@
+import type { IExecuteFunctions } from 'n8n-workflow';
+import { NodeOperationError } from 'n8n-workflow';
+
+import { ikasGraphQLRequest } from '../../GenericFunctions';
+import { SaveCustomerMutation } from '../../graphql/mutations/SaveCustomer';
+
+/**
+ * Builds the basic customer input object with required fields only
+ */
+function buildBasicCustomerInput(
+	context: IExecuteFunctions,
+	itemIndex: number,
+): Record<string, unknown> {
+	const customerInput: Record<string, unknown> = {
+		firstName: context.getNodeParameter('firstName', itemIndex) as string,
+	};
+
+	// Add optional basic fields if provided
+	const lastName = context.getNodeParameter('lastName', itemIndex) as string;
+	if (lastName) {
+		customerInput.lastName = lastName;
+	}
+
+	const email = context.getNodeParameter('email', itemIndex) as string;
+	if (email) {
+		customerInput.email = email;
+	}
+
+	const phone = context.getNodeParameter('phone', itemIndex) as string;
+	if (phone) {
+		customerInput.phone = phone;
+	}
+
+	return customerInput;
+}
+
+/**
+ * Processes and adds additional fields to the customer input
+ */
+function processAdditionalFields(
+	context: IExecuteFunctions,
+	itemIndex: number,
+	customerInput: Record<string, unknown>,
+): void {
+	const additionalFields = context.getNodeParameter('additionalFields', itemIndex) as Record<
+		string,
+		unknown
+	>;
+
+	if (!additionalFields || Object.keys(additionalFields).length === 0) {
+		return;
+	}
+
+	// Account Status
+	if (additionalFields.accountStatus) {
+		customerInput.accountStatus = additionalFields.accountStatus;
+	}
+
+	// Customer Group IDs
+	if (additionalFields.customerGroupIds) {
+		const groupIds = (additionalFields.customerGroupIds as string)
+			.split(',')
+			.map((id: string) => id.trim())
+			.filter((id: string) => id.length > 0);
+		if (groupIds.length > 0) {
+			customerInput.customerGroupIds = groupIds;
+		}
+	}
+
+	// Email Subscription Status
+	if (additionalFields.subscriptionStatus) {
+		customerInput.subscriptionStatus = additionalFields.subscriptionStatus;
+	}
+
+	// Note
+	if (additionalFields.note) {
+		customerInput.note = additionalFields.note;
+	}
+
+	// Preferred Language
+	if (additionalFields.preferredLanguage) {
+		customerInput.preferredLanguage = additionalFields.preferredLanguage;
+	}
+
+	// Price List ID
+	if (additionalFields.priceListId) {
+		customerInput.priceListId = additionalFields.priceListId;
+	}
+
+	// Registration Source
+	if (additionalFields.registrationSource) {
+		customerInput.registrationSource = additionalFields.registrationSource;
+	}
+
+	// Tag IDs
+	if (additionalFields.tagIds) {
+		const tagIds = (additionalFields.tagIds as string)
+			.split(',')
+			.map((id: string) => id.trim())
+			.filter((id: string) => id.length > 0);
+		if (tagIds.length > 0) {
+			customerInput.tagIds = tagIds;
+		}
+	}
+}
+
+export async function createCustomer(
+	this: IExecuteFunctions,
+	itemIndex: number,
+): Promise<Record<string, unknown>> {
+	try {
+		// Build basic customer input
+		const customerInput = buildBasicCustomerInput(this, itemIndex);
+
+		// Process additional fields
+		processAdditionalFields(this, itemIndex, customerInput);
+
+		// Create the customer
+		const response = await ikasGraphQLRequest.call(this, SaveCustomerMutation, {
+			input: customerInput,
+		});
+
+		this.logger.info(JSON.stringify(response, null, 2), {
+			message: 'Customer create response',
+		});
+
+		const responseData = response.data?.saveCustomer || {};
+
+		return responseData;
+	} catch (error) {
+		if (error instanceof Error) {
+			throw new NodeOperationError(this.getNode(), `Failed to create customer: ${error.message}`, {
+				itemIndex,
+			});
+		}
+		throw error;
+	}
+}
