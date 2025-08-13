@@ -1,6 +1,9 @@
 node_modules/
 dist/
-.env
-.vscode/
 *.log
+*.tgz
+.DS_Store
+.env
+.vscode/settings.json
+
 

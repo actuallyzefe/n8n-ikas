@@ -3,7 +3,7 @@ import { NodeOperationError } from 'n8n-workflow';
 
 import { ikasGraphQLRequest } from '../../GenericFunctions';
 import { DeleteProductListMutation } from '../../graphql/mutations/DeleteProducts';
-import { ArrayHelper } from '../../utils/ArrayHelper';
+import { extractValidIds } from '../../utils/extract-valid-ids.utils';
 /**
  * Deletes multiple products by their IDs
  */
@@ -13,7 +13,7 @@ export async function deleteProducts(this: IExecuteFunctions, itemIndex: number)
 		const productIdsParam = this.getNodeParameter('productIds', itemIndex) as any;
 		
 		// Extract product IDs from the fixedCollection structure
-		const productIds = ArrayHelper.extractValidIds(productIdsParam, 'productIds', 'id');
+		const productIds = extractValidIds(productIdsParam, 'productIds', 'id');
 
 		if (productIds.length === 0) {
 			throw new NodeOperationError(

@@ -1,9 +1,8 @@
 import type { IExecuteFunctions } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
-
 import { ikasGraphQLRequest } from '../../GenericFunctions';
 import { DeleteOrderListMutation } from '../../graphql/mutations/DeleteOrderList';
-import { ArrayHelper } from '../../utils/ArrayHelper';
+import { extractValidIds } from '../../utils/extract-valid-ids.utils';
 
 /**
  * Deletes multiple orders by their IDs
@@ -14,7 +13,7 @@ export async function deleteProductOrderList(this: IExecuteFunctions, itemIndex:
 		const orderListIdsParam = this.getNodeParameter('orderListIds', itemIndex) as any;
 		
 		// Extract order list IDs from the fixedCollection structure
-		const orderListIds = ArrayHelper.extractValidIds(orderListIdsParam, 'orderListIds', 'id');
+		const orderListIds = extractValidIds(orderListIdsParam, 'orderListIds', 'id');
 
 		if (orderListIds.length === 0) {
 			throw new NodeOperationError(
