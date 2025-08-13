@@ -17,8 +17,9 @@ import {
 	updateProduct,
 	getManyProducts,
 	searchProducts,
+	deleteProducts,
 } from './operations/products';
-import { getManyOrders, fulfillOrder, updateOrderPackageStatus } from './operations/orders';
+import { getManyOrders, fulfillOrder, updateOrderPackageStatus, deleteProductOrderList } from './operations/orders';
 
 export class Ikas implements INodeType {
 	description: INodeTypeDescription = {
@@ -117,20 +118,18 @@ export class Ikas implements INodeType {
 						search: searchProducts,
 						create: createProduct,
 						update: updateProduct,
+						delete: deleteProducts,
 					},
 					order: {
 						getMany: getManyOrders,
 						fulfill: fulfillOrder,
 						updatePackageStatus: updateOrderPackageStatus,
+						deleteOrderList: deleteProductOrderList,
 					},
 				};
 
 				// Get the handler for the current resource
 				const resourceHandler = resourceHandlers[resource as keyof typeof resourceHandlers];
-
-				this.logger.info(JSON.stringify(resourceHandler, null, 2), {
-					message: 'Resource handler is here',
-				});
 
 				if (!resourceHandler) {
 					throw new NodeOperationError(
@@ -143,10 +142,6 @@ export class Ikas implements INodeType {
 				// Get the operation handler
 				const operationHandler = resourceHandler[operation as keyof typeof resourceHandler];
 
-				this.logger.info(JSON.stringify(operationHandler, null, 2), {
-					message: 'Operation handler is here',
-				});
-
 				if (!operationHandler) {
 					throw new NodeOperationError(
 						this.getNode(),
@@ -157,10 +152,6 @@ export class Ikas implements INodeType {
 
 				// Execute the handler
 				const responseData = await operationHandler.call(this, i);
-
-				this.logger.info(JSON.stringify(responseData, null, 2), {
-					message: 'Response data is here',
-				});
 
 				// Handle different response structures
 				let dataToReturn: any[] = [];
@@ -183,6 +174,12 @@ export class Ikas implements INodeType {
 					dataToReturn = [responseData || {}];
 				} else if (resource === 'order' && operation === 'updatePackageStatus') {
 					// For update package status, return the updated order
+					dataToReturn = [responseData || {}];
+				} else if (resource === 'order' && operation === 'deleteOrderList') {
+					// For delete order list, return the deletion result
+					dataToReturn = [responseData || {}];
+				} else if (resource === 'product' && operation === 'delete') {
+					// For delete products, return the deletion result
 					dataToReturn = [responseData || {}];
 				} else if (resource === 'product' && operation === 'search') {
 					// For product search, handle the search response structure

@@ -5,10 +5,12 @@ import {
 	productSearchProperties,
 	productCreateUpdateProperties,
 	productAdditionalFieldsProperty,
+	productDeleteProperties,
 	orderOperationProperty,
 	orderFiltersProperty,
 	orderFulfillProperties,
 	orderPackageStatusProperties,
+	orderDeleteProperties,
 } from './index';
 
 /**
@@ -28,11 +30,13 @@ export function buildNodeProperties(): INodeProperties[] {
 		orderFiltersProperty,
 		...orderFulfillProperties,
 		...orderPackageStatusProperties,
+		...orderDeleteProperties,
 
 		// Product-specific properties
 		...productSearchProperties,
 		...productCreateUpdateProperties,
 		productAdditionalFieldsProperty,
+		...productDeleteProperties,
 	];
 }
 
@@ -49,12 +53,14 @@ export function buildNodePropertiesGrouped(): INodeProperties[] {
 		orderFiltersProperty,
 		...orderFulfillProperties,
 		...orderPackageStatusProperties,
+		...orderDeleteProperties,
 	];
 
 	const productProperties: INodeProperties[] = [
 		...productSearchProperties,
 		...productCreateUpdateProperties,
 		productAdditionalFieldsProperty,
+		...productDeleteProperties,
 	];
 
 	return [...baseProperties, ...operationProperties, ...orderProperties, ...productProperties];

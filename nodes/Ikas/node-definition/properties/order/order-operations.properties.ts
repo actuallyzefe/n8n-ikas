@@ -29,6 +29,12 @@ export const orderOperationProperty: INodeProperties = {
 			description: 'Update order package status',
 			action: 'Update package status',
 		},
+		{
+			name: 'Delete Product Order Lists',
+			value: 'deleteOrderList',
+			description: 'Delete product order lists',
+			action: 'Delete product order lists',
+		},
 	],
 	default: 'getMany',
 };

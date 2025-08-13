@@ -90,7 +90,7 @@ export const productAdditionalFieldsProperty: INodeProperties = {
 			},
 		},
 		{
-			displayName: 'Stock Location',
+			displayName: 'Stock Location Name or ID',
 			name: 'stockLocationId',
 			type: 'options',
 			typeOptions: {

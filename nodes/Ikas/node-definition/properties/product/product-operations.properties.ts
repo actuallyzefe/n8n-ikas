@@ -12,6 +12,18 @@ export const productOperationProperty: INodeProperties = {
 	},
 	options: [
 		{
+			name: 'Create',
+			value: 'create',
+			description: 'Create a new product',
+			action: 'Create a product',
+		},
+		{
+			name: 'Delete Products',
+			value: 'delete',
+			description: 'Delete multiple products',
+			action: 'Delete products',
+		},
+		{
 			name: 'Get Many',
 			value: 'getMany',
 			description: 'Get multiple products',
@@ -22,12 +34,6 @@ export const productOperationProperty: INodeProperties = {
 			value: 'search',
 			description: 'Search products with filters',
 			action: 'Search products',
-		},
-		{
-			name: 'Create',
-			value: 'create',
-			description: 'Create a new product',
-			action: 'Create a product',
 		},
 		{
 			name: 'Update',
