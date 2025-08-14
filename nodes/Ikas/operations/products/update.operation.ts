@@ -3,7 +3,9 @@ import { NodeOperationError } from 'n8n-workflow';
 
 import { ikasGraphQLRequest } from '../../GenericFunctions';
 import { SaveProductMutation } from '../../graphql/mutations/SaveProduct';
+import { SaveStockLocationsMutation } from '../../graphql/mutations/SaveStockLocations';
 import { GetProductByIdQuery } from '../../graphql/queries/GetProductById';
+import { GetStockLocationsQuery } from '../../graphql/queries/GetStockLocations';
 
 /**
  * Fetches existing product data by ID
@@ -125,6 +127,137 @@ function cleanVariantPrices(variantUpdate: any): void {
 }
 
 /**
+ * Validates a stock location ID exists
+ */
+async function validateStockLocationId(
+	context: IExecuteFunctions,
+	stockLocationId: string,
+): Promise<any> {
+	const stockLocationResponse = await ikasGraphQLRequest.call(context, GetStockLocationsQuery);
+
+	context.logger.info(JSON.stringify(stockLocationResponse, null, 2), {
+		message: 'Stock location response is here',
+	});
+
+	const stockLocations = stockLocationResponse.data?.listStockLocation || [];
+
+	context.logger.info(JSON.stringify(stockLocations, null, 2), {
+		message: 'Stock locations are here',
+	});
+
+	const stockLocation = stockLocations.find((location: any) => location.id === stockLocationId);
+
+	if (!stockLocation) {
+		throw new NodeOperationError(
+			context.getNode(),
+			`No stock location found with ID: ${stockLocationId}`,
+		);
+	}
+
+	return stockLocation;
+}
+
+/**
+ * Updates stock for a product after update
+ */
+async function updateProductStock(
+	context: IExecuteFunctions,
+	productId: string,
+	variantId: string,
+	stockCount: number,
+	stockLocationId: string,
+): Promise<any> {
+	// Validate the stock location ID exists
+	const stockLocation = await validateStockLocationId(context, stockLocationId);
+
+	context.logger.info(`Using stock location: ${stockLocation.name} (ID: ${stockLocationId})`);
+
+	const stockInput = {
+		productStockLocationInputs: [
+			{
+				productId: productId,
+				variantId: variantId,
+				stockLocationId: stockLocationId,
+				stockCount: stockCount,
+			},
+		],
+	};
+
+	const stockResponse = await ikasGraphQLRequest.call(context, SaveStockLocationsMutation, {
+		input: stockInput,
+	});
+
+	context.logger.info(JSON.stringify(stockResponse, null, 2), {
+		message: 'Stock management response',
+	});
+
+	// Return stock information if successful
+	if (stockResponse.data?.saveProductStockLocations === true) {
+		return {
+			stockUpdated: true,
+			stockLocationUsed: {
+				id: stockLocationId,
+				name: stockLocation.name,
+				stockCount: stockCount,
+			},
+		};
+	}
+
+	return null;
+}
+
+/**
+ * Handles stock management after product update
+ */
+async function handleStockManagement(
+	context: IExecuteFunctions,
+	responseData: any,
+	stockCount: number,
+	stockLocationId: string,
+): Promise<void> {
+	if (stockCount <= 0 || !stockLocationId) return;
+
+	try {
+		const productId = responseData.id;
+		const variantId = responseData.variants?.[0]?.id;
+
+		context.logger.info(JSON.stringify(productId, null, 2), {
+			message: 'Product ID is here',
+		});
+		context.logger.info(JSON.stringify(variantId, null, 2), {
+			message: 'Variant ID is here',
+		});
+
+		if (productId && variantId) {
+			const stockInfo = await updateProductStock(
+				context,
+				productId,
+				variantId,
+				stockCount,
+				stockLocationId,
+			);
+
+			if (stockInfo) {
+				Object.assign(responseData, stockInfo);
+			}
+		} else {
+			context.logger.warn('Could not update stock: missing product ID or variant ID');
+		}
+	} catch (stockError) {
+		context.logger.error(JSON.stringify(stockError, null, 2), {
+			message: 'Stock error is here',
+		});
+		context.logger.error('Failed to update stock after product update', {
+			error: stockError,
+			productId: responseData.id,
+			stockCount,
+			stockLocationId,
+		});
+		// Don't throw - product was updated successfully, just stock failed
+	}
+}
+
+/**
  * Processes and adds additional fields to the product update input
  */
 function processUpdateAdditionalFields(
@@ -184,19 +317,24 @@ function processUpdateAdditionalFields(
 				}
 			}
 			// Handle other product-level fields that moved to additional
+			// Note: stockLocationId and stockCount are excluded as they're not part of ProductInput
+			// and should be handled separately via stock management
 			else if (
 				key === 'description' ||
 				key === 'shortDescription' ||
 				key === 'weight' ||
-				key === 'maxQuantityPerCart' ||
-				key === 'stockLocationId' ||
-				key === 'stockCount'
+				key === 'maxQuantityPerCart'
 			) {
 				if (typeof value === 'string' && value.trim()) {
 					productInput[key] = value;
 				} else if (typeof value !== 'string' && value !== null) {
 					productInput[key] = value;
 				}
+			}
+			// Skip stock-related fields as they need separate handling
+			else if (key === 'stockLocationId' || key === 'stockCount') {
+				// These will be handled by stock management after product update
+				return;
 			}
 			// Handle regular string fields
 			else {
@@ -242,7 +380,14 @@ export async function updateProduct(this: IExecuteFunctions, itemIndex: number):
 		message: 'Update product response is here',
 	});
 
-	const responseData = response.data?.saveProduct || {};
+	let responseData = response.data?.saveProduct || {};
+
+	// Handle stock management after product update
+	const additionalFields = this.getNodeParameter('additionalFields', itemIndex) as any;
+	const stockCount = additionalFields?.stockCount || 0;
+	const stockLocationId = additionalFields?.stockLocationId || '';
+
+	await handleStockManagement(this, responseData, stockCount, stockLocationId);
 
 	this.logger.info(JSON.stringify(responseData, null, 2), {
 		message: 'Update response data is here',

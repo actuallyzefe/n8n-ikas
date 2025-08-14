@@ -3,8 +3,8 @@ import { NodeOperationError } from 'n8n-workflow';
 
 import { ikasGraphQLRequest } from '../../GenericFunctions';
 import { SaveProductMutation } from '../../graphql/mutations/SaveProduct';
-import { GetStockLocationsQuery } from '../../graphql/queries/GetStockLocations';
 import { SaveStockLocationsMutation } from '../../graphql/mutations/SaveStockLocations';
+import { GetStockLocationsQuery } from '../../graphql/queries/GetStockLocations';
 
 /**
  * Builds the basic product input object with required fields only
@@ -100,17 +100,22 @@ function processAdditionalFields(
 				}
 			}
 			// Handle other product-level fields
+			// Note: stockLocationId and stockCount are excluded as they're not part of ProductInput
+			// and should be handled separately via stock management
 			else if (
 				key === 'description' ||
 				key === 'shortDescription' ||
 				key === 'weight' ||
-				key === 'maxQuantityPerCart' ||
-				key === 'stockLocationId' ||
-				key === 'stockCount'
+				key === 'maxQuantityPerCart'
 			) {
 				if (value !== null && value !== '') {
 					productInput[key] = value;
 				}
+			}
+			// Skip stock-related fields as they need separate handling
+			else if (key === 'stockLocationId' || key === 'stockCount') {
+				// These will be handled by stock management after product creation
+				return;
 			}
 			// Handle regular string fields
 			else {
