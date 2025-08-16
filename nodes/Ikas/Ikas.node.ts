@@ -2,9 +2,9 @@ import type {
 	IExecuteFunctions,
 	ILoadOptionsFunctions,
 	INodeExecutionData,
+	INodePropertyOptions,
 	INodeType,
 	INodeTypeDescription,
-	INodePropertyOptions,
 } from 'n8n-workflow';
 import { NodeConnectionType, NodeOperationError } from 'n8n-workflow';
 
@@ -12,14 +12,14 @@ import { ikasGraphQLRequest } from './GenericFunctions';
 import { GetSalesChannelsQuery } from './graphql/queries/GetSalesChannels';
 import { GetStockLocationsQuery } from './graphql/queries/GetStockLocations';
 import { buildNodeProperties } from './node-definition/properties';
+import { fulfillOrder, getManyOrders, updateOrderPackageStatus } from './operations/orders';
 import {
 	createProduct,
-	updateProduct,
+	deleteProducts,
 	getManyProducts,
 	searchProducts,
-	deleteProducts,
+	updateProduct,
 } from './operations/products';
-import { getManyOrders, fulfillOrder, updateOrderPackageStatus, deleteProductOrderList } from './operations/orders';
 
 export class Ikas implements INodeType {
 	description: INodeTypeDescription = {
@@ -124,7 +124,6 @@ export class Ikas implements INodeType {
 						getMany: getManyOrders,
 						fulfill: fulfillOrder,
 						updatePackageStatus: updateOrderPackageStatus,
-						deleteOrderList: deleteProductOrderList,
 					},
 				};
 
@@ -174,9 +173,6 @@ export class Ikas implements INodeType {
 					dataToReturn = [responseData || {}];
 				} else if (resource === 'order' && operation === 'updatePackageStatus') {
 					// For update package status, return the updated order
-					dataToReturn = [responseData || {}];
-				} else if (resource === 'order' && operation === 'deleteOrderList') {
-					// For delete order list, return the deletion result
 					dataToReturn = [responseData || {}];
 				} else if (resource === 'product' && operation === 'delete') {
 					// For delete products, return the deletion result

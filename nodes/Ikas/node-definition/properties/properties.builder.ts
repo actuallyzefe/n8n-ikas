@@ -1,16 +1,15 @@
 import type { INodeProperties } from 'n8n-workflow';
 import {
-	resourceProperty,
-	productOperationProperty,
-	productSearchProperties,
-	productCreateUpdateProperties,
-	productAdditionalFieldsProperty,
-	productDeleteProperties,
-	orderOperationProperty,
 	orderFiltersProperty,
 	orderFulfillProperties,
+	orderOperationProperty,
 	orderPackageStatusProperties,
-	orderDeleteProperties,
+	productAdditionalFieldsProperty,
+	productCreateUpdateProperties,
+	productDeleteProperties,
+	productOperationProperty,
+	productSearchProperties,
+	resourceProperty,
 } from './index';
 
 /**
@@ -30,7 +29,6 @@ export function buildNodeProperties(): INodeProperties[] {
 		orderFiltersProperty,
 		...orderFulfillProperties,
 		...orderPackageStatusProperties,
-		...orderDeleteProperties,
 
 		// Product-specific properties
 		...productSearchProperties,
@@ -53,7 +51,6 @@ export function buildNodePropertiesGrouped(): INodeProperties[] {
 		orderFiltersProperty,
 		...orderFulfillProperties,
 		...orderPackageStatusProperties,
-		...orderDeleteProperties,
 	];
 
 	const productProperties: INodeProperties[] = [
