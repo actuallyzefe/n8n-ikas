@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-ikas",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "n8n community node for Ikas e-commerce platform integration",
   "keywords": [
     "n8n-community-node-package",
