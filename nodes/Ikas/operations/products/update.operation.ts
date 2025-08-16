@@ -6,6 +6,7 @@ import { SaveProductMutation } from '../../graphql/mutations/SaveProduct';
 import { SaveStockLocationsMutation } from '../../graphql/mutations/SaveStockLocations';
 import { GetProductByIdQuery } from '../../graphql/queries/GetProductById';
 import { GetStockLocationsQuery } from '../../graphql/queries/GetStockLocations';
+import { handleImageUpload } from './helpers/upload-image.helpers';
 
 /**
  * Fetches existing product data by ID
@@ -336,6 +337,11 @@ function processUpdateAdditionalFields(
 				// These will be handled by stock management after product update
 				return;
 			}
+			// Skip image-related fields as they need separate handling via REST API
+			else if (key === 'productImage') {
+				// This will be handled by image upload after product update
+				return;
+			}
 			// Handle regular string fields
 			else {
 				if (typeof value === 'string' && value.trim()) {
@@ -382,11 +388,15 @@ export async function updateProduct(this: IExecuteFunctions, itemIndex: number):
 
 	let responseData = response.data?.saveProduct || {};
 
-	// Handle stock management after product update
+	// Handle additional operations after product update
 	const additionalFields = this.getNodeParameter('additionalFields', itemIndex) as any;
+
+	// Handle image upload first (if requested)
+	await handleImageUpload(this, responseData, additionalFields);
+
+	// Handle stock management
 	const stockCount = additionalFields?.stockCount || 0;
 	const stockLocationId = additionalFields?.stockLocationId || '';
-
 	await handleStockManagement(this, responseData, stockCount, stockLocationId);
 
 	this.logger.info(JSON.stringify(responseData, null, 2), {

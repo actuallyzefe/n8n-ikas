@@ -219,7 +219,7 @@ export const productAdditionalFieldsProperty: INodeProperties = {
 			default: '',
 			description: 'Vendor ID for the product',
 		},
-		// Image Upload Fields (only for create operation)
+		// Image Upload Fields (for both create and update operations)
 		{
 			displayName: 'Product Image',
 			name: 'productImage',
@@ -229,12 +229,9 @@ export const productAdditionalFieldsProperty: INodeProperties = {
 				show: {
 					'@version': [1, 2, 3, 4, 5], // Always show for collection items
 				},
-				hide: {
-					'/operation': ['update'], // Hide for update operation
-				},
 			},
 			default: {},
-			description: 'Upload an image for this product after creation',
+			description: 'Upload an image for this product',
 			options: [
 				{
 					displayName: 'Image Source',
