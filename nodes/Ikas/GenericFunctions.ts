@@ -46,5 +46,7 @@ export async function ikasGraphQLRequest(
 		body.variables = variables;
 	}
 
+	this.logger.info(`Body is here: ${JSON.stringify(body, null, 2)}`);
+
 	return await ikasApiRequest.call(this, 'POST', '/graphql', body);
 }

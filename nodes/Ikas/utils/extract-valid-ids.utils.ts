@@ -8,7 +8,7 @@
 export function extractValidIds<T extends Record<string, any>>(
 	param: T | undefined,
 	key: keyof T,
-	idField: string
+	idField: string,
 ): string[] {
 	if (!param || !param[key] || !Array.isArray(param[key])) {
 		return [];
@@ -16,5 +16,6 @@ export function extractValidIds<T extends Record<string, any>>(
 
 	return (param[key] as any[])
 		.map((item: any) => item[idField])
-		.filter((id: string) => id && id.trim() !== '');
+		.filter((id: string) => id && typeof id === 'string' && id.trim() !== '')
+		.map((id: string) => id.trim());
 }

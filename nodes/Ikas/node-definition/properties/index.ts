@@ -3,20 +3,19 @@ export { resourceProperty } from './base.properties';
 
 // Product properties
 export {
+	productAdditionalFieldsProperty,
+	productCreateUpdateProperties,
+	productDeleteProperties,
 	productOperationProperty,
 	productSearchProperties,
-	productCreateUpdateProperties,
-	productAdditionalFieldsProperty,
-	productDeleteProperties,
 } from './product';
 
 // Order properties
 export {
-	orderOperationProperty,
 	orderFiltersProperty,
 	orderFulfillProperties,
+	orderOperationProperty,
 	orderPackageStatusProperties,
-	orderDeleteProperties,
 } from './order';
 
 // Property builder utilities
