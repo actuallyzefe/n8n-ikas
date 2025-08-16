@@ -98,7 +98,6 @@ This node supports the following operations:
   - `SearchProducts` - Advanced product search with filters and pagination
   - `GetOrders` - Retrieve order information with comprehensive filtering
 - **Mutations**:
-
   - `SaveProduct` - Create or update products with full product structure
   - `FulfillOrder` - Fulfill order line items with tracking
   - `UpdateOrderPackageStatus` - Update package statuses with tracking info
@@ -175,7 +174,6 @@ Schedule Trigger → IKAS (Get Products) → Check Stock Levels → IKAS (Update
 
 This workflow runs daily to check stock levels and update products with low inventory alerts.
 
-
 ### Product Operations
 
 **Get Products**: Select "Product" as resource and "Get Many" as operation to fetch all products from your store with complete product information.
@@ -239,7 +237,6 @@ We welcome contributions from the community! Whether you're fixing bugs, adding 
 7. **Push to Your Branch**: `git push origin feature/your-feature-name`
 8. **Create a Pull Request**: Submit your changes for review
 
-
 ### Code Standards
 
 - Follow the existing TypeScript code style
@@ -256,7 +253,6 @@ Found a bug or have a feature request? Please check existing issues first, then 
 - Expected vs actual behavior
 - Your environment details (n8n version, Node.js version, etc.)
 
-
 ## Development Setup
 
 ### Prerequisites
@@ -267,22 +263,26 @@ Found a bug or have a feature request? Please check existing issues first, then 
 ### Setup Instructions
 
 1. **Clone the Repository**
+
    ```bash
    git clone https://github.com/actuallyzefe/n8n-ikas.git
    cd n8n-ikas
    ```
 
 2. **Install Dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Build the Project**
+
    ```bash
    npm run build
    ```
 
 4. **Development Mode** (watches for changes)
+
    ```bash
    npm run dev
    ```
@@ -326,15 +326,6 @@ Found a bug or have a feature request? Please check existing issues first, then 
 - [IKAS Developer Portal](https://ikas.dev/)
 - [GraphQL Best Practices](https://graphql.org/learn/best-practices/)
 
-## Version History
-
-### 0.1.13 (Current)
-- Enhanced order package status updates
-- Improved error handling and logging
-- Better TypeScript type definitions
-- Updated documentation
-
-
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
@@ -347,7 +338,8 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ---
 
-**Need Help?** 
+**Need Help?**
+
 - Check out the [Issues](https://github.com/actuallyzefe/n8n-ikas/issues) for common problems
 - Create a new issue if you can't find a solution
 - Join the [n8n community](https://community.n8n.io/) for general n8n support
