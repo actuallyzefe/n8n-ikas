@@ -5,6 +5,7 @@ import { ikasGraphQLRequest } from '../../GenericFunctions';
 import { SaveProductMutation } from '../../graphql/mutations/SaveProduct';
 import { SaveStockLocationsMutation } from '../../graphql/mutations/SaveStockLocations';
 import { GetStockLocationsQuery } from '../../graphql/queries/GetStockLocations';
+import { handleImageUpload } from './helpers/upload-image.helpers';
 
 /**
  * Builds the basic product input object with required fields only
@@ -115,6 +116,11 @@ function processAdditionalFields(
 			// Skip stock-related fields as they need separate handling
 			else if (key === 'stockLocationId' || key === 'stockCount') {
 				// These will be handled by stock management after product creation
+				return;
+			}
+			// Skip image-related fields as they need separate handling via REST API
+			else if (key === 'productImage') {
+				// This will be handled by image upload after product creation
 				return;
 			}
 			// Handle regular string fields
@@ -280,11 +286,15 @@ export async function createProduct(this: IExecuteFunctions, itemIndex: number):
 
 	const responseData = response.data?.saveProduct || {};
 
-	// Handle stock management after product creation
+	// Handle additional operations after product creation
 	const additionalFields = this.getNodeParameter('additionalFields', itemIndex) as any;
+
+	// Handle image upload first (if requested)
+	await handleImageUpload(this, responseData, additionalFields);
+
+	// Handle stock management
 	const stockCount = additionalFields?.stockCount || 0;
 	const stockLocationId = additionalFields?.stockLocationId || '';
-
 	await handleStockManagement(this, responseData, stockCount, stockLocationId);
 
 	this.logger.info(JSON.stringify(responseData, null, 2), {
