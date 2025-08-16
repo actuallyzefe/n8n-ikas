@@ -219,5 +219,89 @@ export const productAdditionalFieldsProperty: INodeProperties = {
 			default: '',
 			description: 'Vendor ID for the product',
 		},
+		// Image Upload Fields (only for create operation)
+		{
+			displayName: 'Product Image',
+			name: 'productImage',
+			type: 'collection',
+			placeholder: 'Add Image',
+			displayOptions: {
+				show: {
+					'@version': [1, 2, 3, 4, 5], // Always show for collection items
+				},
+				hide: {
+					'/operation': ['update'], // Hide for update operation
+				},
+			},
+			default: {},
+			description: 'Upload an image for this product after creation',
+			options: [
+				{
+					displayName: 'Image Source',
+					name: 'imageSource',
+					type: 'options',
+					options: [
+						{
+							name: 'URL',
+							value: 'url',
+							description: 'Upload image from a URL',
+						},
+						{
+							name: 'Base64',
+							value: 'base64',
+							description: 'Upload image from Base64 encoded data',
+						},
+					],
+					default: 'url',
+					description: 'Choose the source of the image',
+				},
+				{
+					displayName: 'Image URL',
+					name: 'imageUrl',
+					type: 'string',
+					displayOptions: {
+						show: {
+							imageSource: ['url'],
+						},
+					},
+					default: '',
+					placeholder: 'https://example.com/image.jpg',
+					description: 'URL of the image to upload',
+				},
+				{
+					displayName: 'Image Base64',
+					name: 'imageBase64',
+					type: 'string',
+					displayOptions: {
+						show: {
+							imageSource: ['base64'],
+						},
+					},
+					typeOptions: {
+						rows: 4,
+					},
+					default: '',
+					placeholder: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD...',
+					description: 'Base64 encoded image data',
+				},
+				{
+					displayName: 'Image Order',
+					name: 'imageOrder',
+					type: 'number',
+					default: 0,
+					description: 'Order/position of the image (0 = first)',
+					typeOptions: {
+						minValue: 0,
+					},
+				},
+				{
+					displayName: 'Is Main Image',
+					name: 'isMainImage',
+					type: 'boolean',
+					default: true,
+					description: 'Whether this image should be the main/primary image for the product',
+				},
+			],
+		},
 	],
 };

@@ -8,6 +8,7 @@ export {
 	productDeleteProperties,
 	productOperationProperty,
 	productSearchProperties,
+	productUploadImageProperties,
 } from './product';
 
 // Order properties
