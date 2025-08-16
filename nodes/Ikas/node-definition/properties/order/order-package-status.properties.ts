@@ -36,12 +36,26 @@ export const orderPackageStatusProperties: INodeProperties[] = [
 				displayName: 'Packages',
 				values: [
 					{
+						displayName: 'Error Message',
+						name: 'errorMessage',
+						type: 'string',
+						default: '',
+						description: 'Error message (optional, typically used with ERROR status)',
+					},
+					{
 						displayName: 'Package ID',
 						name: 'packageId',
 						type: 'string',
 						default: '',
 						description: 'ID of the package to update',
-						required: true,
+							required:	true,
+					},
+					{
+						displayName: 'Source ID',
+						name: 'sourceId',
+						type: 'string',
+						default: '',
+						description: 'Source ID for the update (optional)',
 					},
 					{
 						displayName: 'Status',
@@ -103,21 +117,7 @@ export const orderPackageStatusProperties: INodeProperties[] = [
 								value: 'UNABLE_TO_DELIVER',
 							},
 						],
-						required: true,
-					},
-					{
-						displayName: 'Source ID',
-						name: 'sourceId',
-						type: 'string',
-						default: '',
-						description: 'Source ID for the update (optional)',
-					},
-					{
-						displayName: 'Error Message',
-						name: 'errorMessage',
-						type: 'string',
-						default: '',
-						description: 'Error message (optional, typically used with ERROR status)',
+							required:	true,
 					},
 					{
 						displayName: 'Tracking Information',
@@ -168,9 +168,9 @@ export const orderPackageStatusProperties: INodeProperties[] = [
 								default: '',
 								description: 'Tracking number for the shipment',
 							},
-						],
+					]
 					},
-				],
+			],
 			},
 		],
 	},

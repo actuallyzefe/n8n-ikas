@@ -7,6 +7,7 @@ export {
 	productSearchProperties,
 	productCreateUpdateProperties,
 	productAdditionalFieldsProperty,
+	productDeleteProperties,
 } from './product';
 
 // Order properties
@@ -15,6 +16,7 @@ export {
 	orderFiltersProperty,
 	orderFulfillProperties,
 	orderPackageStatusProperties,
+	orderDeleteProperties,
 } from './order';
 
 // Property builder utilities

@@ -278,7 +278,7 @@ export async function createProduct(this: IExecuteFunctions, itemIndex: number):
 		message: 'Response is here',
 	});
 
-	let responseData = response.data?.saveProduct || {};
+	const responseData = response.data?.saveProduct || {};
 
 	// Handle stock management after product creation
 	const additionalFields = this.getNodeParameter('additionalFields', itemIndex) as any;
