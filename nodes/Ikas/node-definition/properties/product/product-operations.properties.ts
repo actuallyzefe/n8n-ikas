@@ -41,6 +41,12 @@ export const productOperationProperty: INodeProperties = {
 			description: 'Update an existing product',
 			action: 'Update a product',
 		},
+		{
+			name: 'Upload Image',
+			value: 'uploadImage',
+			description: 'Upload image to product variants',
+			action: 'Upload image to product',
+		},
 	],
 	default: 'getMany',
 };

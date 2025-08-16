@@ -9,6 +9,7 @@ import type {
 import { NodeConnectionType, NodeOperationError } from 'n8n-workflow';
 
 import { ikasGraphQLRequest } from './GenericFunctions';
+import { GetProductsQuery } from './graphql/queries/GetProducts';
 import { GetSalesChannelsQuery } from './graphql/queries/GetSalesChannels';
 import { GetStockLocationsQuery } from './graphql/queries/GetStockLocations';
 import { buildNodeProperties } from './node-definition/properties';
@@ -19,6 +20,7 @@ import {
 	getManyProducts,
 	searchProducts,
 	updateProduct,
+	uploadImage,
 } from './operations/products';
 
 export class Ikas implements INodeType {
@@ -100,6 +102,58 @@ export class Ikas implements INodeType {
 					return [];
 				}
 			},
+
+			async getProductVariants(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+				try {
+					const response = await ikasGraphQLRequest.call(this, GetProductsQuery);
+					this.logger.info(JSON.stringify(response, null, 2), {
+						message: 'Products response for variants',
+					});
+
+					const products = response.data?.listProduct?.data || [];
+					const variantOptions: INodePropertyOptions[] = [];
+
+					products.forEach((product: any) => {
+						const productName = product.name || 'Unknown Product';
+
+						if (product.variants && product.variants.length > 0) {
+							product.variants.forEach((variant: any) => {
+								const variantId = variant.id;
+								const sku = variant.sku || '';
+								const barcodeList = Array.isArray(variant.barcodeList)
+									? variant.barcodeList.join(', ')
+									: variant.barcodeList || '';
+
+								// Build display name starting with SKU, barcode, or variant ID
+								let displayName = '';
+								if (barcodeList) {
+									displayName = `${barcodeList} - ${productName}`;
+								} else if (sku) {
+									displayName = `${sku} - ${productName}`;
+								} else {
+									displayName = `${variantId.substring(0, 8)}... - ${productName}`;
+								}
+
+								variantOptions.push({
+									name: displayName,
+									value: variantId,
+								});
+							});
+						}
+					});
+
+					this.logger.info(JSON.stringify(variantOptions, null, 2), {
+						message: 'Variant options created',
+					});
+
+					return variantOptions;
+				} catch (error) {
+					this.logger.error(JSON.stringify(error, null, 2), {
+						message: 'Error loading product variants',
+					});
+					return [];
+				}
+			},
 		},
 	};
 
@@ -119,6 +173,7 @@ export class Ikas implements INodeType {
 						create: createProduct,
 						update: updateProduct,
 						delete: deleteProducts,
+						uploadImage: uploadImage,
 					},
 					order: {
 						getMany: getManyOrders,

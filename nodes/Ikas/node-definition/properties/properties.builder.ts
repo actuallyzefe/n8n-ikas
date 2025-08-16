@@ -9,6 +9,7 @@ import {
 	productDeleteProperties,
 	productOperationProperty,
 	productSearchProperties,
+	productUploadImageProperties,
 	resourceProperty,
 } from './index';
 
@@ -35,6 +36,7 @@ export function buildNodeProperties(): INodeProperties[] {
 		...productCreateUpdateProperties,
 		productAdditionalFieldsProperty,
 		...productDeleteProperties,
+		...productUploadImageProperties,
 	];
 }
 
@@ -58,6 +60,7 @@ export function buildNodePropertiesGrouped(): INodeProperties[] {
 		...productCreateUpdateProperties,
 		productAdditionalFieldsProperty,
 		...productDeleteProperties,
+		...productUploadImageProperties,
 	];
 
 	return [...baseProperties, ...operationProperties, ...orderProperties, ...productProperties];

@@ -1,7 +1,7 @@
 import type { IExecuteFunctions } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
 
-import { ikasGraphQLRequest } from '../../GenericFunctions';
+import { ikasApiRequest, ikasGraphQLRequest } from '../../GenericFunctions';
 import { SaveProductMutation } from '../../graphql/mutations/SaveProduct';
 import { SaveStockLocationsMutation } from '../../graphql/mutations/SaveStockLocations';
 import { GetStockLocationsQuery } from '../../graphql/queries/GetStockLocations';
@@ -117,6 +117,11 @@ function processAdditionalFields(
 				// These will be handled by stock management after product creation
 				return;
 			}
+			// Skip image-related fields as they need separate handling via REST API
+			else if (key === 'productImage') {
+				// This will be handled by image upload after product creation
+				return;
+			}
 			// Handle regular string fields
 			else {
 				productInput[key] = value;
@@ -206,6 +211,99 @@ async function createProductStock(
 }
 
 /**
+ * Handles image upload after product creation
+ */
+async function handleImageUpload(
+	context: IExecuteFunctions,
+	responseData: any,
+	additionalFields: any,
+): Promise<void> {
+	// Check if productImage collection exists and has content
+	if (!additionalFields.productImage || Object.keys(additionalFields.productImage).length === 0) {
+		return;
+	}
+
+	try {
+		const variantId = responseData.variants?.[0]?.id;
+		if (!variantId) {
+			context.logger.warn('Could not upload image: missing variant ID');
+			return;
+		}
+
+		const productImage = additionalFields.productImage;
+		const imageSource = productImage.imageSource || 'url';
+		const imageOrder = productImage.imageOrder || 0;
+		const isMainImage = productImage.isMainImage !== false; // Default to true
+
+		const imageData: any = {
+			order: imageOrder,
+			isMain: isMainImage,
+		};
+
+		// Add image source data
+		if (imageSource === 'url') {
+			const imageUrl = productImage.imageUrl;
+			if (!imageUrl || !imageUrl.trim()) {
+				context.logger.warn('Image URL is required when using URL as image source');
+				return;
+			}
+			imageData.url = imageUrl;
+		} else if (imageSource === 'base64') {
+			const imageBase64 = productImage.imageBase64;
+			if (!imageBase64 || !imageBase64.trim()) {
+				context.logger.warn('Base64 image data is required when using Base64 as image source');
+				return;
+			}
+			imageData.base64 = imageBase64;
+		}
+
+		const requestBody = {
+			productImage: {
+				variantIds: [variantId],
+				...imageData,
+			},
+		};
+
+		context.logger.info(JSON.stringify(requestBody, null, 2), {
+			message: 'Upload image request body',
+		});
+
+		// Make the REST API call to upload image
+		const uploadResponse = await ikasApiRequest.call(
+			context,
+			'POST',
+			'/product/upload/image',
+			requestBody,
+		);
+
+		context.logger.info(JSON.stringify(uploadResponse, null, 2), {
+			message: 'Upload image response',
+		});
+
+		// Add image upload info to response
+		Object.assign(responseData, {
+			imageUploaded: true,
+			imageSource: imageSource,
+			imageOrder: imageOrder,
+			isMainImage: isMainImage,
+		});
+	} catch (imageError) {
+		context.logger.error(JSON.stringify(imageError, null, 2), {
+			message: 'Image upload error',
+		});
+		context.logger.error('Failed to upload image after product creation', {
+			error: imageError,
+			productId: responseData.id,
+		});
+		// Don't throw - product was created successfully, just image upload failed
+		Object.assign(responseData, {
+			imageUploadError: true,
+			imageUploadErrorMessage: (imageError as Error).message,
+		});
+	}
+}
+
+/**
  * Handles stock management after product creation
  */
 async function handleStockManagement(
@@ -280,11 +378,15 @@ export async function createProduct(this: IExecuteFunctions, itemIndex: number):
 
 	const responseData = response.data?.saveProduct || {};
 
-	// Handle stock management after product creation
+	// Handle additional operations after product creation
 	const additionalFields = this.getNodeParameter('additionalFields', itemIndex) as any;
+
+	// Handle image upload first (if requested)
+	await handleImageUpload(this, responseData, additionalFields);
+
+	// Handle stock management
 	const stockCount = additionalFields?.stockCount || 0;
 	const stockLocationId = additionalFields?.stockLocationId || '';
-
 	await handleStockManagement(this, responseData, stockCount, stockLocationId);
 
 	this.logger.info(JSON.stringify(responseData, null, 2), {
