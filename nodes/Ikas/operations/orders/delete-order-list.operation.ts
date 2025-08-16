@@ -1,8 +1,8 @@
 import type { IExecuteFunctions } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
 import { ikasGraphQLRequest } from '../../GenericFunctions';
-import { DeleteOrderListMutation } from '../../graphql/mutations/DeleteOrderList';
 import { extractValidIds } from '../../utils/extract-valid-ids.utils';
+import { DeleteProductOrderListMutation } from '../../graphql/mutations/DeleteProductOrderList';
 
 /**
  * Deletes multiple orders by their IDs
@@ -13,7 +13,7 @@ export async function deleteProductOrderList(this: IExecuteFunctions, itemIndex:
 		const orderListIdsParam = this.getNodeParameter('orderListIds', itemIndex) as any;
 		
 		// Extract order list IDs from the fixedCollection structure
-		const orderListIds = extractValidIds(orderListIdsParam, 'orderListIds', 'id');
+		const orderListIds = extractValidIds(orderListIdsParam, 'orderListIds', 'orderListId');
 
 		if (orderListIds.length === 0) {
 			throw new NodeOperationError(
@@ -28,7 +28,7 @@ export async function deleteProductOrderList(this: IExecuteFunctions, itemIndex:
 		});
 
 		// Execute the delete mutation (returns boolean)
-		const response = await ikasGraphQLRequest.call(this, DeleteOrderListMutation, {
+		const response = await ikasGraphQLRequest.call(this, DeleteProductOrderListMutation, {
 			idList: orderListIds,
 		});
 
@@ -36,7 +36,7 @@ export async function deleteProductOrderList(this: IExecuteFunctions, itemIndex:
 			message: 'Delete product order list response',
 		});
 
-		const success: boolean = response.data?.deleteOrderList === true;
+		const success: boolean = response.data?.deleteProductOrderList === true;
 
 		if (!success) {
 			throw new NodeOperationError(
