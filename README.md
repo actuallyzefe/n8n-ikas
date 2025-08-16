@@ -259,6 +259,7 @@ Found a bug or have a feature request? Please check existing issues first, then 
 
 - Node.js >=22.16
 - n8n (for testing)
+- Ikas Credentials (Client ID - Client Secret)
 
 ### Setup Instructions
 
@@ -281,13 +282,7 @@ Found a bug or have a feature request? Please check existing issues first, then 
    npm run build
    ```
 
-4. **Development Mode** (watches for changes)
-
-   ```bash
-   npm run dev
-   ```
-
-5. **Linting and Formatting**
+4. **Linting and Formatting**
    ```bash
    npm run lint        # Check for linting issues
    npm run lintfix     # Fix auto-fixable issues
@@ -313,14 +308,14 @@ Found a bug or have a feature request? Please check existing issues first, then 
 ### Testing Your Changes
 
 1. Build the project: `npm run build`
-2. Link to n8n: Follow [n8n's community node development guide](https://docs.n8n.io/integrations/community-nodes/creating-nodes/)
+2. Link to n8n: Follow [n8n's community node development guide](https://docs.n8n.io/integrations/creating-nodes/test/run-node-locally//)
 3. Test your changes in n8n workflows
 4. Verify all operations work as expected
 
 ## Resources
 
 - [n8n Community Nodes Documentation](https://docs.n8n.io/integrations/#community-nodes)
-- [n8n Node Development Guide](https://docs.n8n.io/integrations/community-nodes/creating-nodes/)
+- [n8n Node Development Guide](https://docs.n8n.io/integrations/creating-nodes/test/run-node-locally//)
 - [IKAS API Documentation](https://ikas.dev/docs/intro)
 - [IKAS Authentication Guide](https://ikas.dev/docs/api/getting-started/authentication)
 - [IKAS Developer Portal](https://ikas.dev/)
