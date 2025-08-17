@@ -24,6 +24,12 @@ export const customerOperationProperty: INodeProperties = {
 			action: 'Get many customers',
 		},
 		{
+			name: 'Search',
+			value: 'search',
+			description: 'Search customers',
+			action: 'Search customers',
+		},
+		{
 			name: 'Update',
 			value: 'update',
 			description: 'Update an existing customer',

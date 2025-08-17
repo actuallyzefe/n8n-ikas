@@ -6,6 +6,7 @@ export {
 	customerOperationProperty,
 	customerCreateUpdateProperties,
 	customerFiltersProperty,
+	customerSearchProperties,
 } from './customer';
 
 // Product properties

@@ -4,7 +4,7 @@ import { ikasGraphQLRequest } from '../../GenericFunctions';
 import { GetCustomersQuery } from '../../graphql/queries/GetCustomers';
 
 /**
- * Builds the query variables for filtering customers
+ * Builds the query variables for filtering customers (only supported parameters)
  */
 function buildCustomerFilters(context: IExecuteFunctions, itemIndex: number): IDataObject {
 	const filters: IDataObject = {};
@@ -39,12 +39,12 @@ function buildCustomerFilters(context: IExecuteFunctions, itemIndex: number): ID
 			filters.phone = { eq: additionalFilters.phone };
 		}
 
-		// Search filter
+		// Search filter (direct string)
 		if (additionalFilters.search) {
 			filters.search = additionalFilters.search;
 		}
 
-		// Sort filter
+		// Sort filter (direct string)
 		if (additionalFilters.sort) {
 			filters.sort = additionalFilters.sort;
 		}
@@ -60,25 +60,6 @@ function buildCustomerFilters(context: IExecuteFunctions, itemIndex: number): ID
 			}
 			filters.updatedAt = dateFilter;
 		}
-
-		// Multi-select filters that need special handling
-		const multiSelectFilters = ['accountStatus', 'subscriptionStatus', 'registrationSource'];
-		for (const filterName of multiSelectFilters) {
-			if (additionalFilters[filterName] && Array.isArray(additionalFilters[filterName])) {
-				const values = additionalFilters[filterName] as string[];
-				if (values.length > 0) {
-					filters[filterName] = { in: values };
-				}
-			}
-		}
-
-		// Boolean filters
-		if (typeof additionalFilters.isEmailVerified === 'boolean') {
-			filters.isEmailVerified = { eq: additionalFilters.isEmailVerified };
-		}
-		if (typeof additionalFilters.isPhoneVerified === 'boolean') {
-			filters.isPhoneVerified = { eq: additionalFilters.isPhoneVerified };
-		}
 	}
 
 	return filters;
@@ -87,16 +68,12 @@ function buildCustomerFilters(context: IExecuteFunctions, itemIndex: number): ID
 export async function getManyCustomers(
 	this: IExecuteFunctions,
 	itemIndex: number,
-): Promise<IDataObject[]> {
+): Promise<IDataObject> {
 	const filters = buildCustomerFilters(this, itemIndex);
 
 	const response = await ikasGraphQLRequest.call(this, GetCustomersQuery, filters);
 
-	this.logger.info(JSON.stringify(response, null, 2), {
-		message: 'Get customers response',
-	});
-
-	const responseData = response.data?.listCustomer?.data || [];
+	const responseData = response.data?.listCustomer || [];
 
 	return responseData;
 }

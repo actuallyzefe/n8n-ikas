@@ -1,4 +1,5 @@
 import type {
+	IDataObject,
 	IExecuteFunctions,
 	ILoadOptionsFunctions,
 	INodeExecutionData,
@@ -19,7 +20,7 @@ import {
 	searchProducts,
 } from './operations/products';
 import { getManyOrders, fulfillOrder, updateOrderPackageStatus } from './operations/orders';
-import { createCustomer, updateCustomer, getManyCustomers } from './operations/customers';
+import { createCustomer, updateCustomer, getManyCustomers, searchCustomers } from './operations/customers';
 
 export class Ikas implements INodeType {
 	description: INodeTypeDescription = {
@@ -65,7 +66,7 @@ export class Ikas implements INodeType {
 						message: 'Sales channels are here',
 					});
 
-					return salesChannels.map((channel: any) => ({
+					return salesChannels.map((channel: { id: string; name: string }) => ({
 						name: `${channel.name}`,
 						value: channel.id,
 					}));
@@ -89,7 +90,7 @@ export class Ikas implements INodeType {
 						message: 'Stock locations are here',
 					});
 
-					return stockLocations.map((location: any) => ({
+					return stockLocations.map((location: { id: string; name: string }) => ({
 						name: `${location.name}`,
 						value: location.id,
 					}));
@@ -115,6 +116,7 @@ export class Ikas implements INodeType {
 				const resourceHandlers = {
 					customer: {
 						getMany: getManyCustomers,
+						search: searchCustomers,
 						create: createCustomer,
 						update: updateCustomer,
 					},
@@ -169,58 +171,67 @@ export class Ikas implements INodeType {
 				});
 
 				// Handle different response structures
-				let dataToReturn: any[] = [];
+				let dataToReturn: IDataObject[] = [];
 
 				if (resource === 'customer' && operation === 'getMany') {
 					// For customers, extract the data array and include pagination info
-					const customers = responseData.data || [];
+					const customers = (responseData.data as IDataObject[]) || [];
 					const paging = {
 						page: responseData.page,
 						limit: responseData.limit,
 						count: responseData.count,
 					};
 
-					dataToReturn = customers.map((customer: any) => ({
+					dataToReturn = customers.map((customer: IDataObject) => ({
 						...customer,
 						_pagination: paging,
 					}));
 				} else if (resource === 'customer' && (operation === 'create' || operation === 'update')) {
 					// For create/update customer, return the customer object
-					dataToReturn = [responseData || {}];
+					dataToReturn = [((responseData || {}) as IDataObject)];
+				} else if (resource === 'customer' && operation === 'search') {
+					// For customer search (listCustomer with filters)
+					const customers = (responseData.results as IDataObject[]) || [];
+					const paging = (responseData.paging as IDataObject) || {};
+
+					dataToReturn = customers.map((customer: IDataObject) => ({
+						...customer,
+						_pagination: paging,
+					}));
 				} else if (resource === 'order' && operation === 'getMany') {
 					// For orders, extract the data array and include pagination info
-					const orders = responseData.data || [];
+					const orders = (responseData.data as IDataObject[]) || [];
 					const paging = {
 						page: responseData.page,
 						limit: responseData.limit,
 						count: responseData.count,
 					};
 
-					dataToReturn = orders.map((order: any) => ({
+					dataToReturn = orders.map((order: IDataObject) => ({
 						...order,
 						_pagination: paging,
 					}));
 				} else if (resource === 'order' && operation === 'fulfill') {
 					// For fulfill order, return the updated order
-					dataToReturn = [responseData || {}];
+					dataToReturn = [((responseData || {}) as IDataObject)];
 				} else if (resource === 'order' && operation === 'updatePackageStatus') {
 					// For update package status, return the updated order
-					dataToReturn = [responseData || {}];
+					dataToReturn = [((responseData || {}) as IDataObject)];
 				} else if (resource === 'product' && operation === 'search') {
 					// For product search, handle the search response structure
-					const products = responseData.results || [];
-					const paging = responseData.paging || {};
+					const products = (responseData.results as IDataObject[]) || [];
+					const paging = (responseData.paging as IDataObject) || {};
 
-					dataToReturn = products.map((product: any) => ({
+					dataToReturn = products.map((product: IDataObject) => ({
 						...product,
 						_pagination: paging,
 					}));
 				} else if (Array.isArray(responseData)) {
 					// For arrays (like getMany products)
-					dataToReturn = responseData;
+					dataToReturn = responseData as IDataObject[];
 				} else {
 					// For single objects (like create/update operations)
-					dataToReturn = [responseData || {}];
+					dataToReturn = [((responseData || {}) as IDataObject)];
 				}
 
 				const executionData = this.helpers.constructExecutionMetaData(

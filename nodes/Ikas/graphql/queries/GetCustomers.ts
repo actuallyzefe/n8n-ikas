@@ -1,9 +1,8 @@
 export const GetCustomersQuery = `
-	query ListCustomers($email: StringFilterInput, $id: StringFilterInput, $merchantId: StringFilterInput, $pagination: PaginationInput, $phone: StringFilterInput, $search: String, $sort: String, $updatedAt: DateFilterInput) {
+	query ListCustomers($email: StringFilterInput, $id: StringFilterInput, $pagination: PaginationInput, $phone: StringFilterInput, $search: String, $sort: String, $updatedAt: DateFilterInput) {
 		listCustomer(
 			email: $email
 			id: $id
-			merchantId: $merchantId
 			pagination: $pagination
 			phone: $phone
 			search: $search
@@ -12,33 +11,27 @@ export const GetCustomersQuery = `
 		) {
 			data {
 				id
-				accountStatus
-				accountStatusUpdatedAt
-				customerSequence
-				email
-				emailVerifiedDate
 				firstName
-				firstOrderDate
-				fullName
-				ip
-				isEmailVerified
-				isPhoneVerified
 				lastName
+				email
+				phone
+				fullName
+				note
+				accountStatus
+				b2bStatus
+				gender
+				customerSequence
+				firstOrderDate
 				lastOrderDate
 				lastPriceListId
 				lastStorefrontRoutingId
-				note
 				orderCount
 				passwordUpdateDate
-				phone
-				phoneVerifiedDate
-				preferredLanguage
-				priceListId
+				totalOrderPrice
 				registrationSource
 				subscriptionStatus
-				subscriptionStatusUpdatedAt
-				totalOrderPrice
-				userAgent
+				phoneSubscriptionStatus
+				smsSubscriptionStatus
 				customerGroupIds
 				customerSegmentIds
 				tagIds
@@ -58,17 +51,14 @@ export const GetCustomersQuery = `
 					isDefault
 					city {
 						id
-						code
 						name
 					}
 					district {
 						id
-						code
 						name
 					}
 					state {
 						id
-						code
 						name
 					}
 					country {
@@ -80,23 +70,14 @@ export const GetCustomersQuery = `
 					}
 					region {
 						id
-						code
 						name
 					}
 				}
 				attributes {
-					attributeId
-					attributeName
-					attributeType
 					value
 				}
 				priceListRules {
-					id
 					priceListId
-					discountType
-					discountValue
-					minQuantity
-					maxQuantity
 				}
 			}
 			page

@@ -54,25 +54,11 @@ export const customerFiltersProperty: INodeProperties = {
 			],
 		},
 		{
-			displayName: 'Email Verified',
-			name: 'isEmailVerified',
-			type: 'boolean',
-			default: false,
-			description: 'Whether to filter by email verification status',
-		},
-		{
 			displayName: 'Phone Number',
 			name: 'phone',
 			type: 'string',
 			default: '',
 			description: 'Filter by customer phone number',
-		},
-		{
-			displayName: 'Phone Verified',
-			name: 'isPhoneVerified',
-			type: 'boolean',
-			default: false,
-			description: 'Whether to filter by phone verification status',
 		},
 		{
 			displayName: 'Registration Source',
@@ -104,8 +90,6 @@ export const customerFiltersProperty: INodeProperties = {
 			options: [
 				{ name: 'Updated At (Ascending)', value: 'updatedAt' },
 				{ name: 'Updated At (Descending)', value: '-updatedAt' },
-				{ name: 'Created At (Ascending)', value: 'createdAt' },
-				{ name: 'Created At (Descending)', value: '-createdAt' },
 			],
 		},
 		{

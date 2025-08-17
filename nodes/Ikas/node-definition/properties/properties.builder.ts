@@ -4,6 +4,7 @@ import {
 	customerOperationProperty,
 	customerCreateUpdateProperties,
 	customerFiltersProperty,
+	customerSearchProperties,
 	productOperationProperty,
 	productSearchProperties,
 	productCreateUpdateProperties,
@@ -31,6 +32,7 @@ export function buildNodeProperties(): INodeProperties[] {
 		// Customer-specific properties
 		...customerCreateUpdateProperties,
 		customerFiltersProperty,
+		...customerSearchProperties,
 
 		// Order-specific properties
 		orderFiltersProperty,
