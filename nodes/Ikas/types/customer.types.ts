@@ -71,11 +71,11 @@ export enum CustomerPriceListRuleValueTypeEnum {
  * Customer Registration Source Enum
  */
 export enum CustomerRegistrationSourceEnum {
-	APPLE = 'apple',
-	CREDENTIALS = 'credentials',
-	FACEBOOK = 'facebook',
-	GOOGLE = 'google',
-	TWITCH = 'twitch',
+	APPLE = 'APPLE',
+	CREDENTIALS = 'CREDENTIALS',
+	FACEBOOK = 'FACEBOOK',
+	GOOGLE = 'GOOGLE',
+	TWITCH = 'TWITCH',
 }
 
 /**

@@ -80,8 +80,8 @@ function processAdditionalFields(
 
 	// Email Subscription Status
 	if (additionalFields.subscriptionStatus) {
-		customerInput.subscriptionStatus =
-			additionalFields.subscriptionStatus as CustomerInput['subscriptionStatus'];
+		const status = String(additionalFields.subscriptionStatus).toUpperCase();
+		customerInput.subscriptionStatus = status as CustomerInput['subscriptionStatus'];
 	}
 
 	// Full Name
@@ -101,8 +101,8 @@ function processAdditionalFields(
 
 	// Phone Subscription Status
 	if (additionalFields.phoneSubscriptionStatus) {
-		customerInput.phoneSubscriptionStatus =
-			additionalFields.phoneSubscriptionStatus as CustomerInput['phoneSubscriptionStatus'];
+		const pstatus = String(additionalFields.phoneSubscriptionStatus).toUpperCase();
+		customerInput.phoneSubscriptionStatus = pstatus as CustomerInput['phoneSubscriptionStatus'];
 	}
 
 	// Preferred Language
@@ -117,14 +117,14 @@ function processAdditionalFields(
 
 	// Registration Source
 	if (additionalFields.registrationSource) {
-		customerInput.registrationSource =
-			additionalFields.registrationSource as CustomerInput['registrationSource'];
+		const src = String(additionalFields.registrationSource).toUpperCase();
+		customerInput.registrationSource = src as CustomerInput['registrationSource'];
 	}
 
 	// SMS Subscription Status
 	if (additionalFields.smsSubscriptionStatus) {
-		customerInput.smsSubscriptionStatus =
-			additionalFields.smsSubscriptionStatus as CustomerInput['smsSubscriptionStatus'];
+		const sstatus = String(additionalFields.smsSubscriptionStatus).toUpperCase();
+		customerInput.smsSubscriptionStatus = sstatus as CustomerInput['smsSubscriptionStatus'];
 	}
 
 	// Tag IDs
@@ -150,7 +150,19 @@ export async function createCustomer(
 		// Process additional fields
 		processAdditionalFields(this, itemIndex, customerInput);
 
+		// Basic validation: ensure at least one contact method present
+		if (!customerInput.email && !customerInput.phone) {
+			throw new NodeOperationError(
+				this.getNode(),
+				'Customer creation requires at least one of: Email or Phone',
+				{ itemIndex },
+			);
+		}
+
 		// Create the customer
+		this.logger.info(JSON.stringify(customerInput, null, 2), {
+			message: 'Customer create input',
+		});
 		const response = await ikasGraphQLRequest.call(this, SaveCustomerMutation, {
 			input: customerInput,
 		});
@@ -162,12 +174,16 @@ export async function createCustomer(
 		const responseData = response.data?.saveCustomer || {};
 
 		return responseData;
-	} catch (error) {
-		if (error instanceof Error) {
-			throw new NodeOperationError(this.getNode(), `Failed to create customer: ${error.message}`, {
-				itemIndex,
-			});
-		}
-		throw error;
+	} catch (error: unknown) {
+		const errObj = error as { response?: { body?: unknown; status?: number } } | undefined;
+		const body = errObj?.response?.body as unknown;
+		const status = errObj?.response?.status;
+		const details = body ? JSON.stringify(body).slice(0, 1000) : '';
+		const msg = error instanceof Error ? error.message : 'Unknown error';
+		throw new NodeOperationError(
+			this.getNode(),
+			`Failed to create customer: ${msg}${status ? ' | Status: ' + status : ''}${details ? ' | Details: ' + details : ''}`,
+			{ itemIndex },
+		);
 	}
 }
