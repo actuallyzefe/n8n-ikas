@@ -98,7 +98,6 @@ This node supports the following operations:
   - `SearchProducts` - Advanced product search with filters and pagination
   - `GetOrders` - Retrieve order information with comprehensive filtering
 - **Mutations**:
-
   - `SaveProduct` - Create or update products with full product structure
   - `FulfillOrder` - Fulfill order line items with tracking
   - `UpdateOrderPackageStatus` - Update package statuses with tracking info
@@ -175,7 +174,6 @@ Schedule Trigger → IKAS (Get Products) → Check Stock Levels → IKAS (Update
 
 This workflow runs daily to check stock levels and update products with low inventory alerts.
 
-
 ### Product Operations
 
 **Get Products**: Select "Product" as resource and "Get Many" as operation to fetch all products from your store with complete product information.
@@ -239,7 +237,6 @@ We welcome contributions from the community! Whether you're fixing bugs, adding 
 7. **Push to Your Branch**: `git push origin feature/your-feature-name`
 8. **Create a Pull Request**: Submit your changes for review
 
-
 ### Code Standards
 
 - Follow the existing TypeScript code style
@@ -256,38 +253,36 @@ Found a bug or have a feature request? Please check existing issues first, then 
 - Expected vs actual behavior
 - Your environment details (n8n version, Node.js version, etc.)
 
-
 ## Development Setup
 
 ### Prerequisites
 
 - Node.js >=22.16
 - n8n (for testing)
+- Ikas Credentials (Client ID - Client Secret)
 
 ### Setup Instructions
 
 1. **Clone the Repository**
+
    ```bash
    git clone https://github.com/actuallyzefe/n8n-ikas.git
    cd n8n-ikas
    ```
 
 2. **Install Dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Build the Project**
+
    ```bash
    npm run build
    ```
 
-4. **Development Mode** (watches for changes)
-   ```bash
-   npm run dev
-   ```
-
-5. **Linting and Formatting**
+4. **Linting and Formatting**
    ```bash
    npm run lint        # Check for linting issues
    npm run lintfix     # Fix auto-fixable issues
@@ -313,27 +308,18 @@ Found a bug or have a feature request? Please check existing issues first, then 
 ### Testing Your Changes
 
 1. Build the project: `npm run build`
-2. Link to n8n: Follow [n8n's community node development guide](https://docs.n8n.io/integrations/community-nodes/creating-nodes/)
+2. Link to n8n: Follow [n8n's community node development guide](https://docs.n8n.io/integrations/creating-nodes/test/run-node-locally//)
 3. Test your changes in n8n workflows
 4. Verify all operations work as expected
 
 ## Resources
 
 - [n8n Community Nodes Documentation](https://docs.n8n.io/integrations/#community-nodes)
-- [n8n Node Development Guide](https://docs.n8n.io/integrations/community-nodes/creating-nodes/)
+- [n8n Node Development Guide](https://docs.n8n.io/integrations/creating-nodes/test/run-node-locally//)
 - [IKAS API Documentation](https://ikas.dev/docs/intro)
 - [IKAS Authentication Guide](https://ikas.dev/docs/api/getting-started/authentication)
 - [IKAS Developer Portal](https://ikas.dev/)
 - [GraphQL Best Practices](https://graphql.org/learn/best-practices/)
-
-## Version History
-
-### 0.1.13 (Current)
-- Enhanced order package status updates
-- Improved error handling and logging
-- Better TypeScript type definitions
-- Updated documentation
-
 
 ## License
 
@@ -347,7 +333,8 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ---
 
-**Need Help?** 
+**Need Help?**
+
 - Check out the [Issues](https://github.com/actuallyzefe/n8n-ikas/issues) for common problems
 - Create a new issue if you can't find a solution
 - Join the [n8n community](https://community.n8n.io/) for general n8n support

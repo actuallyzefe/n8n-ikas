@@ -12,6 +12,18 @@ export const productOperationProperty: INodeProperties = {
 	},
 	options: [
 		{
+			name: 'Create',
+			value: 'create',
+			description: 'Create a new product',
+			action: 'Create a product',
+		},
+		{
+			name: 'Delete',
+			value: 'delete',
+			description: 'Delete multiple products',
+			action: 'Delete products',
+		},
+		{
 			name: 'Get Many',
 			value: 'getMany',
 			description: 'Get multiple products',
@@ -24,16 +36,16 @@ export const productOperationProperty: INodeProperties = {
 			action: 'Search products',
 		},
 		{
-			name: 'Create',
-			value: 'create',
-			description: 'Create a new product',
-			action: 'Create a product',
-		},
-		{
 			name: 'Update',
 			value: 'update',
 			description: 'Update an existing product',
 			action: 'Update a product',
+		},
+		{
+			name: 'Upload Image',
+			value: 'uploadImage',
+			description: 'Upload image to product variants',
+			action: 'Upload image to product',
 		},
 	],
 	default: 'getMany',

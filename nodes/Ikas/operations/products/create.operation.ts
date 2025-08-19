@@ -3,8 +3,9 @@ import { NodeOperationError } from 'n8n-workflow';
 
 import { ikasGraphQLRequest } from '../../GenericFunctions';
 import { SaveProductMutation } from '../../graphql/mutations/SaveProduct';
-import { GetStockLocationsQuery } from '../../graphql/queries/GetStockLocations';
 import { SaveStockLocationsMutation } from '../../graphql/mutations/SaveStockLocations';
+import { GetStockLocationsQuery } from '../../graphql/queries/GetStockLocations';
+import { handleImageUpload } from './helpers/upload-image.helpers';
 
 /**
  * Builds the basic product input object with required fields only
@@ -100,17 +101,27 @@ function processAdditionalFields(
 				}
 			}
 			// Handle other product-level fields
+			// Note: stockLocationId and stockCount are excluded as they're not part of ProductInput
+			// and should be handled separately via stock management
 			else if (
 				key === 'description' ||
 				key === 'shortDescription' ||
 				key === 'weight' ||
-				key === 'maxQuantityPerCart' ||
-				key === 'stockLocationId' ||
-				key === 'stockCount'
+				key === 'maxQuantityPerCart'
 			) {
 				if (value !== null && value !== '') {
 					productInput[key] = value;
 				}
+			}
+			// Skip stock-related fields as they need separate handling
+			else if (key === 'stockLocationId' || key === 'stockCount') {
+				// These will be handled by stock management after product creation
+				return;
+			}
+			// Skip image-related fields as they need separate handling via REST API
+			else if (key === 'productImage') {
+				// This will be handled by image upload after product creation
+				return;
 			}
 			// Handle regular string fields
 			else {
@@ -273,13 +284,17 @@ export async function createProduct(this: IExecuteFunctions, itemIndex: number):
 		message: 'Response is here',
 	});
 
-	let responseData = response.data?.saveProduct || {};
+	const responseData = response.data?.saveProduct || {};
 
-	// Handle stock management after product creation
+	// Handle additional operations after product creation
 	const additionalFields = this.getNodeParameter('additionalFields', itemIndex) as any;
+
+	// Handle image upload first (if requested)
+	await handleImageUpload(this, responseData, additionalFields);
+
+	// Handle stock management
 	const stockCount = additionalFields?.stockCount || 0;
 	const stockLocationId = additionalFields?.stockLocationId || '';
-
 	await handleStockManagement(this, responseData, stockCount, stockLocationId);
 
 	this.logger.info(JSON.stringify(responseData, null, 2), {

@@ -3,23 +3,26 @@ import type {
 	IExecuteFunctions,
 	ILoadOptionsFunctions,
 	INodeExecutionData,
+	INodePropertyOptions,
 	INodeType,
 	INodeTypeDescription,
-	INodePropertyOptions,
 } from 'n8n-workflow';
 import { NodeConnectionType, NodeOperationError } from 'n8n-workflow';
 
 import { ikasGraphQLRequest } from './GenericFunctions';
+import { GetProductsQuery } from './graphql/queries/GetProducts';
 import { GetSalesChannelsQuery } from './graphql/queries/GetSalesChannels';
 import { GetStockLocationsQuery } from './graphql/queries/GetStockLocations';
 import { buildNodeProperties } from './node-definition/properties';
+import { fulfillOrder, getManyOrders, updateOrderPackageStatus } from './operations/orders';
 import {
 	createProduct,
-	updateProduct,
+	deleteProducts,
 	getManyProducts,
 	searchProducts,
+	updateProduct,
+	uploadImage,
 } from './operations/products';
-import { getManyOrders, fulfillOrder, updateOrderPackageStatus } from './operations/orders';
 import { createCustomer, updateCustomer, getManyCustomers, searchCustomers } from './operations/customers';
 
 export class Ikas implements INodeType {
@@ -101,6 +104,58 @@ export class Ikas implements INodeType {
 					return [];
 				}
 			},
+
+			async getProductVariants(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+				try {
+					const response = await ikasGraphQLRequest.call(this, GetProductsQuery);
+					this.logger.info(JSON.stringify(response, null, 2), {
+						message: 'Products response for variants',
+					});
+
+					const products = response.data?.listProduct?.data || [];
+					const variantOptions: INodePropertyOptions[] = [];
+
+					products.forEach((product: any) => {
+						const productName = product.name || 'Unknown Product';
+
+						if (product.variants && product.variants.length > 0) {
+							product.variants.forEach((variant: any) => {
+								const variantId = variant.id;
+								const sku = variant.sku || '';
+								const barcodeList = Array.isArray(variant.barcodeList)
+									? variant.barcodeList.join(', ')
+									: variant.barcodeList || '';
+
+								// Build display name starting with SKU, barcode, or variant ID
+								let displayName = '';
+								if (barcodeList) {
+									displayName = `${barcodeList} - ${productName}`;
+								} else if (sku) {
+									displayName = `${sku} - ${productName}`;
+								} else {
+									displayName = `${variantId.substring(0, 8)}... - ${productName}`;
+								}
+
+								variantOptions.push({
+									name: displayName,
+									value: variantId,
+								});
+							});
+						}
+					});
+
+					this.logger.info(JSON.stringify(variantOptions, null, 2), {
+						message: 'Variant options created',
+					});
+
+					return variantOptions;
+				} catch (error) {
+					this.logger.error(JSON.stringify(error, null, 2), {
+						message: 'Error loading product variants',
+					});
+					return [];
+				}
+			},
 		},
 	};
 
@@ -125,6 +180,8 @@ export class Ikas implements INodeType {
 						search: searchProducts,
 						create: createProduct,
 						update: updateProduct,
+						delete: deleteProducts,
+						uploadImage: uploadImage,
 					},
 					order: {
 						getMany: getManyOrders,
@@ -135,10 +192,6 @@ export class Ikas implements INodeType {
 
 				// Get the handler for the current resource
 				const resourceHandler = resourceHandlers[resource as keyof typeof resourceHandlers];
-
-				this.logger.info(JSON.stringify(resourceHandler, null, 2), {
-					message: 'Resource handler is here',
-				});
 
 				if (!resourceHandler) {
 					throw new NodeOperationError(
@@ -151,10 +204,6 @@ export class Ikas implements INodeType {
 				// Get the operation handler
 				const operationHandler = resourceHandler[operation as keyof typeof resourceHandler];
 
-				this.logger.info(JSON.stringify(operationHandler, null, 2), {
-					message: 'Operation handler is here',
-				});
-
 				if (!operationHandler) {
 					throw new NodeOperationError(
 						this.getNode(),
@@ -165,10 +214,6 @@ export class Ikas implements INodeType {
 
 				// Execute the handler
 				const responseData = await operationHandler.call(this, i);
-
-				this.logger.info(JSON.stringify(responseData, null, 2), {
-					message: 'Response data is here',
-				});
 
 				// Handle different response structures
 				let dataToReturn: IDataObject[] = [];
@@ -217,6 +262,9 @@ export class Ikas implements INodeType {
 				} else if (resource === 'order' && operation === 'updatePackageStatus') {
 					// For update package status, return the updated order
 					dataToReturn = [((responseData || {}) as IDataObject)];
+				} else if (resource === 'product' && operation === 'delete') {
+					// For delete products, return the deletion result
+					dataToReturn = [responseData || {}];
 				} else if (resource === 'product' && operation === 'search') {
 					// For product search, handle the search response structure
 					const products = (responseData.results as IDataObject[]) || [];

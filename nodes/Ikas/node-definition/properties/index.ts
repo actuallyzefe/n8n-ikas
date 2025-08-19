@@ -11,17 +11,19 @@ export {
 
 // Product properties
 export {
+	productAdditionalFieldsProperty,
+	productCreateUpdateProperties,
+	productDeleteProperties,
 	productOperationProperty,
 	productSearchProperties,
-	productCreateUpdateProperties,
-	productAdditionalFieldsProperty,
+	productUploadImageProperties,
 } from './product';
 
 // Order properties
 export {
-	orderOperationProperty,
 	orderFiltersProperty,
 	orderFulfillProperties,
+	orderOperationProperty,
 	orderPackageStatusProperties,
 } from './order';
 

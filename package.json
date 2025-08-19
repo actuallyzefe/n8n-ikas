@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-ikas",
-  "version": "0.1.13",
+  "version": "0.2.1",
   "description": "n8n community node for Ikas e-commerce platform integration",
   "keywords": [
     "n8n-community-node-package",
@@ -48,6 +48,7 @@
     "eslint": "^8.57.0",
     "eslint-plugin-n8n-nodes-base": "^1.16.3",
     "gulp": "^5.0.0",
+    "n8n-workflow": "^1.82.0",
     "prettier": "^3.5.3",
     "rimraf": "^6.0.1",
     "typescript": "^5.8.2"
