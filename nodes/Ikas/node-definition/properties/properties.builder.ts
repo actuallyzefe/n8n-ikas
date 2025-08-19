@@ -31,6 +31,9 @@ export function buildNodeProperties(): INodeProperties[] {
 		...createPaginationProperties('product', 'getMany'),
 		...createPaginationProperties('order', 'getMany'),
 
+		// Pagination properties for search operations
+		...createPaginationProperties('product', 'search'),
+
 		// Order-specific properties
 		orderFiltersProperty,
 		...orderFulfillProperties,

@@ -223,14 +223,8 @@ export class Ikas implements INodeType {
 					// For delete products, return the deletion result
 					dataToReturn = [responseData || {}];
 				} else if (resource === 'product' && operation === 'search') {
-					// For product search, handle the search response structure
-					const products = responseData.results || [];
-					const paging = responseData.paging || {};
-
-					dataToReturn = products.map((product: any) => ({
-						...product,
-						_pagination: paging,
-					}));
+					// For product search with new pagination, responseData is already an array with _pagination
+					dataToReturn = Array.isArray(responseData) ? responseData : [responseData];
 				} else if (resource === 'product' && operation === 'getMany') {
 					// For products with new pagination, responseData is already an array with _pagination
 					dataToReturn = Array.isArray(responseData) ? responseData : [responseData];

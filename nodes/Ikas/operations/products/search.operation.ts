@@ -1,7 +1,7 @@
 import type { IExecuteFunctions } from 'n8n-workflow';
 
-import { ikasGraphQLRequest } from '../../GenericFunctions';
 import { SearchProductsQuery } from '../../graphql/queries/SearchProducts';
+import { executeWithPagination } from '../../utils/pagination.utils';
 
 /**
  * Builds search input parameters from node parameters
@@ -33,41 +33,69 @@ function buildSearchInput(context: IExecuteFunctions, itemIndex: number): any {
 }
 
 /**
- * Adds pagination parameters to search input
+ * Builds search input with pagination for the current page
  */
-function addPaginationToSearchInput(
+function buildSearchInputWithPagination(
 	context: IExecuteFunctions,
 	itemIndex: number,
-	searchInput: any,
-): void {
-	const returnAll = context.getNodeParameter('returnAll', itemIndex) as boolean;
-	if (!returnAll) {
+	currentPage: number = 1,
+): any {
+	const searchInput = buildSearchInput(context, itemIndex);
+
+	// Add pagination based on the pagination options
+	const fetchAllItems = context.getNodeParameter('fetchAllItems', itemIndex) as boolean;
+
+	if (fetchAllItems) {
+		const pageSize = context.getNodeParameter('pageSize', itemIndex) as number;
+		searchInput.pagination = {
+			page: currentPage,
+			limit: pageSize,
+		};
+	} else {
 		const limit = context.getNodeParameter('limit', itemIndex) as number;
 		const page = context.getNodeParameter('page', itemIndex) as number;
 		searchInput.pagination = {
-			limit,
-			page,
+			page: page,
+			limit: limit,
 		};
 	}
+
+	return searchInput;
 }
 
 export async function searchProducts(this: IExecuteFunctions, itemIndex: number): Promise<any> {
-	// Build search input variables
-	const searchInput = buildSearchInput(this, itemIndex);
+	// Build search input variables (keeping all existing search functionality)
+	const baseSearchInput = buildSearchInput(this, itemIndex);
 
-	// Add pagination if needed
-	addPaginationToSearchInput(this, itemIndex, searchInput);
+	// Use a custom approach for search since it has a different structure than listProduct/listOrder
+	const result = await executeWithPagination(
+		this,
+		itemIndex,
+		SearchProductsQuery,
+		{}, // No base variables - we'll build everything in the custom variable builder
+		(response) => ({
+			data: response.data?.searchProducts?.results || [],
+			pagination: {
+				page: response.data?.searchProducts?.page || 1,
+				limit: response.data?.searchProducts?.limit || 50,
+				count: response.data?.searchProducts?.count || 0,
+			},
+		}),
+		// Custom variable builder that creates the full search input with pagination
+		(options, currentPage = 1) => ({
+			input: buildSearchInputWithPagination(this, itemIndex, currentPage),
+		}),
+	);
 
-	// Execute search query
-	const response = await ikasGraphQLRequest.call(this, SearchProductsQuery, {
-		input: searchInput,
+	this.logger.info(`Searched and fetched ${result.data.length} products with pagination`, {
+		message: 'Search Products completed with pagination',
+		pagination: result.pagination,
+		searchFilters: baseSearchInput,
 	});
 
-	const responseData = response.data?.searchProducts || { results: [], paging: {} };
-
-	this.logger.info(JSON.stringify(responseData, null, 2), {
-		message: 'Search Products are here',
-	});
-
-	return responseData;
+	// Return the data with pagination metadata attached to each item
+	return result.data.map((product: any) => ({
+		...product,
+		_pagination: result.pagination,
+	}));
 }
