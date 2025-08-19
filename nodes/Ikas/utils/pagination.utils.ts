@@ -86,8 +86,25 @@ export async function executeWithPagination<T>(
 		const paginationVars = buildPaginationVariables(options);
 		const variables = { ...baseVariables, ...paginationVars };
 
+		context.logger.info(
+			`Single request - Page ${paginationVars.pagination?.page} with limit ${paginationVars.pagination?.limit}`,
+			{
+				message: 'Single pagination request',
+				variables: JSON.stringify(variables),
+			},
+		);
+
 		const response = await ikasGraphQLRequest.call(context, query, variables);
 		const result = dataExtractor(response);
+
+		// Debug logging for single request
+		context.logger.info(`Single request response - Data length: ${result.data?.length || 0}`, {
+			message: 'Single request response debug',
+			variables: JSON.stringify(variables),
+			paginationInfo: JSON.stringify(result.pagination),
+			dataLength: result.data?.length || 0,
+			rawResponse: JSON.stringify(response.data, null, 2),
+		});
 
 		return {
 			data: result.data,
@@ -116,7 +133,19 @@ export async function executeWithPagination<T>(
 		const response = await ikasGraphQLRequest.call(context, query, variables);
 		const result = dataExtractor(response);
 
+		// Debug logging to understand API response
+		context.logger.info(`API Response - Data length: ${result.data?.length || 0}`, {
+			message: 'API Response Debug',
+			variables: JSON.stringify(variables),
+			paginationInfo: JSON.stringify(result.pagination),
+			dataLength: result.data?.length || 0,
+		});
+
 		if (!result.data || result.data.length === 0) {
+			context.logger.info('Breaking pagination loop - no data returned', {
+				message: 'Pagination break',
+				reason: !result.data ? 'result.data is null/undefined' : 'result.data.length is 0',
+			});
 			break;
 		}
 

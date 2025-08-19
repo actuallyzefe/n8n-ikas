@@ -45,7 +45,7 @@ export function createPaginationProperties(resource: string, operation: string):
 		{
 			displayName: 'Limit',
 			name: 'limit',
-			type: 'number',
+			type: 'options',
 			displayOptions: {
 				show: {
 					resource: [resource],
@@ -53,10 +53,13 @@ export function createPaginationProperties(resource: string, operation: string):
 					fetchAllItems: [false],
 				},
 			},
-			typeOptions: {
-				minValue: 1,
-				maxValue: 1000,
-			},
+			options: [
+				{ name: '10', value: 10 },
+				{ name: '20', value: 20 },
+				{ name: '30', value: 30 },
+				{ name: '40', value: 40 },
+				{ name: '50', value: 50 },
+			],
 			default: 50,
 			description: 'Max number of results to return',
 		},
@@ -80,7 +83,7 @@ export function createPaginationProperties(resource: string, operation: string):
 		{
 			displayName: 'Page Size',
 			name: 'pageSize',
-			type: 'number',
+			type: 'options',
 			displayOptions: {
 				show: {
 					resource: [resource],
@@ -88,11 +91,14 @@ export function createPaginationProperties(resource: string, operation: string):
 					fetchAllItems: [true],
 				},
 			},
-			typeOptions: {
-				minValue: 1,
-				maxValue: 1000,
-			},
-			default: 100,
+			options: [
+				{ name: '10', value: 10 },
+				{ name: '20', value: 20 },
+				{ name: '30', value: 30 },
+				{ name: '40', value: 40 },
+				{ name: '50', value: 50 },
+			],
+			default: 50,
 			description: 'Number of items to fetch per page when auto-fetching all items',
 		},
 	];
