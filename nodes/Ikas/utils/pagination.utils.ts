@@ -1,0 +1,166 @@
+import type { IExecuteFunctions } from 'n8n-workflow';
+import { ikasGraphQLRequest } from '../GenericFunctions';
+
+// TODO: Implement sleep function to avoid rate limiting
+
+export interface PaginationOptions {
+	fetchAllItems: boolean;
+	limit?: number;
+	page?: number;
+	pageSize?: number;
+}
+
+export interface PaginationResult<T> {
+	data: T[];
+	pagination: {
+		page: number;
+		limit: number;
+		count: number;
+		totalPages?: number;
+		hasMore?: boolean;
+	};
+}
+
+/**
+ * Extracts pagination options from node parameters
+ */
+export function getPaginationOptions(
+	context: IExecuteFunctions,
+	itemIndex: number,
+): PaginationOptions {
+	const fetchAllItems = context.getNodeParameter('fetchAllItems', itemIndex) as boolean;
+
+	if (fetchAllItems) {
+		const pageSize = context.getNodeParameter('pageSize', itemIndex) as number;
+		return { fetchAllItems, pageSize };
+	}
+
+	const limit = context.getNodeParameter('limit', itemIndex) as number;
+	const page = context.getNodeParameter('page', itemIndex) as number;
+
+	return { fetchAllItems, limit, page };
+}
+
+/**
+ * Builds pagination variables for GraphQL queries using PaginationInput type
+ */
+export function buildPaginationVariables(
+	options: PaginationOptions,
+	currentPage: number = 1,
+): { pagination?: { page: number; limit: number } } {
+	if (options.fetchAllItems) {
+		return {
+			pagination: {
+				page: currentPage,
+				limit: options.pageSize || 100,
+			},
+		};
+	}
+
+	return {
+		pagination: {
+			page: options.page || currentPage,
+			limit: options.limit || 50,
+		},
+	};
+}
+
+/**
+ * Executes a GraphQL query with automatic pagination support
+ */
+export async function executeWithPagination<T>(
+	context: IExecuteFunctions,
+	itemIndex: number,
+	query: string,
+	baseVariables: any = {},
+	dataExtractor: (response: any) => { data: T[]; pagination: any },
+): Promise<PaginationResult<T>> {
+	const options = getPaginationOptions(context, itemIndex);
+	let allData: T[] = [];
+	let currentPage = 1;
+	let totalPages = 1;
+	let lastPagination: any = {};
+
+	// If not fetching all items, just make a single request
+	if (!options.fetchAllItems) {
+		const paginationVars = buildPaginationVariables(options);
+		const variables = { ...baseVariables, ...paginationVars };
+
+		const response = await ikasGraphQLRequest.call(context, query, variables);
+		const result = dataExtractor(response);
+
+		return {
+			data: result.data,
+			pagination: {
+				page: result.pagination.page || paginationVars.pagination?.page || 1,
+				limit: result.pagination.limit || paginationVars.pagination?.limit || 50,
+				count: result.pagination.count || result.data.length,
+				totalPages: 1,
+				hasMore: false,
+			},
+		};
+	}
+
+	// Auto-pagination logic
+	do {
+		const paginationVars = buildPaginationVariables(options, currentPage);
+		const variables = { ...baseVariables, ...paginationVars };
+
+		context.logger.info(
+			`Fetching page ${currentPage} with limit ${paginationVars.pagination?.limit}`,
+			{
+				message: 'Pagination request',
+			},
+		);
+
+		const response = await ikasGraphQLRequest.call(context, query, variables);
+		const result = dataExtractor(response);
+
+		if (!result.data || result.data.length === 0) {
+			break;
+		}
+
+		allData.push(...result.data);
+		lastPagination = result.pagination;
+
+		// Calculate total pages if we have count information
+		if (result.pagination.count !== undefined && paginationVars.pagination?.limit) {
+			totalPages = Math.ceil(result.pagination.count / paginationVars.pagination.limit);
+		}
+
+		// For fetchAllItems mode, continue until we reach the calculated total pages
+		// or we get less data than requested (indicating we've reached the end)
+		const expectedLimit = paginationVars.pagination?.limit || 100;
+		if (result.data.length < expectedLimit) {
+			break;
+		}
+
+		currentPage++;
+
+		// Safety check to prevent infinite loops
+		if (currentPage > 1000) {
+			context.logger.warn('Reached maximum page limit (1000), stopping pagination', {
+				message: 'Pagination safety limit reached',
+			});
+			break;
+		}
+	} while (true);
+
+	context.logger.info(
+		`Completed pagination. Fetched ${allData.length} items across ${currentPage - 1} pages`,
+		{
+			message: 'Pagination completed',
+		},
+	);
+
+	return {
+		data: allData,
+		pagination: {
+			page: 1, // Since we're returning all data, start from page 1
+			limit: allData.length,
+			count: allData.length,
+			totalPages: currentPage - 1,
+			hasMore: false,
+		},
+	};
+}
