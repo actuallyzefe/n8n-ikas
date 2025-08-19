@@ -1,6 +1,14 @@
 // Base properties
 export { resourceProperty } from './base.properties';
 
+// Customer properties
+export {
+	customerOperationProperty,
+	customerCreateUpdateProperties,
+	customerFiltersProperty,
+	customerSearchProperties,
+} from './customer';
+
 // Product properties
 export {
 	productAdditionalFieldsProperty,

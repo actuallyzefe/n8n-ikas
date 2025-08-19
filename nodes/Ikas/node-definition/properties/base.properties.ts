@@ -16,6 +16,11 @@ export const resourceProperty: INodeProperties = {
 			value: 'order',
 			description: 'Work with orders in your IKAS store',
 		},
+		{
+			name: 'Customer',
+			value: 'customer',
+			description: 'Work with customers in your IKAS store',
+		},
 	],
 	default: 'product',
 };
