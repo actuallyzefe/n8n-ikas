@@ -1,5 +1,10 @@
 import type { INodeProperties } from 'n8n-workflow';
 import {
+	resourceProperty,
+	customerOperationProperty,
+	customerCreateUpdateProperties,
+	customerFiltersProperty,
+	customerSearchProperties,
 	orderFiltersProperty,
 	orderFulfillProperties,
 	orderOperationProperty,
@@ -10,7 +15,6 @@ import {
 	productOperationProperty,
 	productSearchProperties,
 	productUploadImageProperties,
-	resourceProperty,
 } from './index';
 
 /**
@@ -21,16 +25,18 @@ export function buildNodeProperties(): INodeProperties[] {
 	return [
 		// Base resource selection
 		resourceProperty,
-
 		// Operations
+		customerOperationProperty,
 		productOperationProperty,
 		orderOperationProperty,
-
+		// Customer-specific properties
+		...customerCreateUpdateProperties,
+		customerFiltersProperty,
+		...customerSearchProperties,
 		// Order-specific properties
 		orderFiltersProperty,
 		...orderFulfillProperties,
 		...orderPackageStatusProperties,
-
 		// Product-specific properties
 		...productSearchProperties,
 		...productCreateUpdateProperties,
@@ -46,15 +52,25 @@ export function buildNodeProperties(): INodeProperties[] {
  */
 export function buildNodePropertiesGrouped(): INodeProperties[] {
 	const baseProperties: INodeProperties[] = [resourceProperty];
-
-	const operationProperties: INodeProperties[] = [productOperationProperty, orderOperationProperty];
-
+	
+	const operationProperties: INodeProperties[] = [
+		customerOperationProperty,
+		productOperationProperty,
+		orderOperationProperty,
+	];
+	
+	const customerProperties: INodeProperties[] = [
+		...customerCreateUpdateProperties,
+		customerFiltersProperty,
+		...customerSearchProperties,
+	];
+	
 	const orderProperties: INodeProperties[] = [
 		orderFiltersProperty,
 		...orderFulfillProperties,
 		...orderPackageStatusProperties,
 	];
-
+	
 	const productProperties: INodeProperties[] = [
 		...productSearchProperties,
 		...productCreateUpdateProperties,
@@ -62,6 +78,12 @@ export function buildNodePropertiesGrouped(): INodeProperties[] {
 		...productDeleteProperties,
 		...productUploadImageProperties,
 	];
-
-	return [...baseProperties, ...operationProperties, ...orderProperties, ...productProperties];
+	
+	return [
+		...baseProperties,
+		...operationProperties,
+		...customerProperties,
+		...orderProperties,
+		...productProperties,
+	];
 }
