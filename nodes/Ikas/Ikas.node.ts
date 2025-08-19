@@ -211,18 +211,8 @@ export class Ikas implements INodeType {
 				let dataToReturn: any[] = [];
 
 				if (resource === 'order' && operation === 'getMany') {
-					// For orders, extract the data array and include pagination info
-					const orders = responseData.data || [];
-					const paging = {
-						page: responseData.page,
-						limit: responseData.limit,
-						count: responseData.count,
-					};
-
-					dataToReturn = orders.map((order: any) => ({
-						...order,
-						_pagination: paging,
-					}));
+					// For orders with new pagination, responseData is already an array with _pagination
+					dataToReturn = Array.isArray(responseData) ? responseData : [responseData];
 				} else if (resource === 'order' && operation === 'fulfill') {
 					// For fulfill order, return the updated order
 					dataToReturn = [responseData || {}];
@@ -241,8 +231,11 @@ export class Ikas implements INodeType {
 						...product,
 						_pagination: paging,
 					}));
+				} else if (resource === 'product' && operation === 'getMany') {
+					// For products with new pagination, responseData is already an array with _pagination
+					dataToReturn = Array.isArray(responseData) ? responseData : [responseData];
 				} else if (Array.isArray(responseData)) {
-					// For arrays (like getMany products)
+					// For other arrays
 					dataToReturn = responseData;
 				} else {
 					// For single objects (like create/update operations)

@@ -1,5 +1,6 @@
 import type { INodeProperties } from 'n8n-workflow';
 import {
+	createPaginationProperties,
 	orderFiltersProperty,
 	orderFulfillProperties,
 	orderOperationProperty,
@@ -25,6 +26,10 @@ export function buildNodeProperties(): INodeProperties[] {
 		// Operations
 		productOperationProperty,
 		orderOperationProperty,
+
+		// Pagination properties for getMany operations
+		...createPaginationProperties('product', 'getMany'),
+		...createPaginationProperties('order', 'getMany'),
 
 		// Order-specific properties
 		orderFiltersProperty,

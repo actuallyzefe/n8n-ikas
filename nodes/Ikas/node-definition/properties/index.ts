@@ -1,5 +1,5 @@
 // Base properties
-export { resourceProperty } from './base.properties';
+export { createPaginationProperties, resourceProperty } from './base.properties';
 
 // Product properties
 export {
