@@ -74,6 +74,7 @@ export async function executeWithPagination<T>(
 	query: string,
 	baseVariables: any = {},
 	dataExtractor: (response: any) => { data: T[]; pagination: any },
+	customVariableBuilder?: (options: PaginationOptions, currentPage?: number) => any,
 ): Promise<PaginationResult<T>> {
 	const options = getPaginationOptions(context, itemIndex);
 	let allData: T[] = [];
@@ -83,11 +84,15 @@ export async function executeWithPagination<T>(
 
 	// If not fetching all items, just make a single request
 	if (!options.fetchAllItems) {
-		const paginationVars = buildPaginationVariables(options);
-		const variables = { ...baseVariables, ...paginationVars };
+		const variables = customVariableBuilder
+			? { ...baseVariables, ...customVariableBuilder(options) }
+			: { ...baseVariables, ...buildPaginationVariables(options) };
 
+		const paginationInfo = customVariableBuilder
+			? 'custom'
+			: buildPaginationVariables(options).pagination;
 		context.logger.info(
-			`Single request - Page ${paginationVars.pagination?.page} with limit ${paginationVars.pagination?.limit}`,
+			`Single request - Page ${typeof paginationInfo === 'object' ? paginationInfo.page : 'custom'} with limit ${typeof paginationInfo === 'object' ? paginationInfo.limit : 'custom'}`,
 			{
 				message: 'Single pagination request',
 				variables: JSON.stringify(variables),
@@ -109,8 +114,8 @@ export async function executeWithPagination<T>(
 		return {
 			data: result.data,
 			pagination: {
-				page: result.pagination.page || paginationVars.pagination?.page || 1,
-				limit: result.pagination.limit || paginationVars.pagination?.limit || 50,
+				page: result.pagination.page || 1,
+				limit: result.pagination.limit || options.limit || options.pageSize || 50,
 				count: result.pagination.count || result.data.length,
 				totalPages: 1,
 				hasMore: false,
@@ -120,15 +125,16 @@ export async function executeWithPagination<T>(
 
 	// Auto-pagination logic
 	do {
-		const paginationVars = buildPaginationVariables(options, currentPage);
-		const variables = { ...baseVariables, ...paginationVars };
+		const variables = customVariableBuilder
+			? { ...baseVariables, ...customVariableBuilder(options, currentPage) }
+			: { ...baseVariables, ...buildPaginationVariables(options, currentPage) };
 
-		context.logger.info(
-			`Fetching page ${currentPage} with limit ${paginationVars.pagination?.limit}`,
-			{
-				message: 'Pagination request',
-			},
-		);
+		const limit = customVariableBuilder
+			? options.pageSize || 50
+			: buildPaginationVariables(options, currentPage).pagination?.limit;
+		context.logger.info(`Fetching page ${currentPage} with limit ${limit}`, {
+			message: 'Pagination request',
+		});
 
 		const response = await ikasGraphQLRequest.call(context, query, variables);
 		const result = dataExtractor(response);
@@ -153,13 +159,13 @@ export async function executeWithPagination<T>(
 		lastPagination = result.pagination;
 
 		// Calculate total pages if we have count information
-		if (result.pagination.count !== undefined && paginationVars.pagination?.limit) {
-			totalPages = Math.ceil(result.pagination.count / paginationVars.pagination.limit);
+		if (result.pagination.count !== undefined && limit) {
+			totalPages = Math.ceil(result.pagination.count / limit);
 		}
 
 		// For fetchAllItems mode, continue until we reach the calculated total pages
 		// or we get less data than requested (indicating we've reached the end)
-		const expectedLimit = paginationVars.pagination?.limit || 100;
+		const expectedLimit = limit || 100;
 		if (result.data.length < expectedLimit) {
 			break;
 		}
