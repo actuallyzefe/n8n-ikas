@@ -1,0 +1,22 @@
+{
+  "node": "n8n-nodes-base.ikasTrigger",
+  "nodeVersion": "1.0",
+  "codexVersion": "1.0",
+  "categories": ["Sales"],
+  "resources": {
+    "credentialDocumentation": [
+      {
+        "url": "https://ikas.dev/docs/api/getting-started/authentication"
+      }
+    ],
+    "primaryDocumentation": [
+      {
+        "url": "https://ikas.dev/docs/api/admin-api/webhooks"
+      }
+    ]
+  },
+  "alias": ["webhook", "trigger", "event", "ikas", "e-commerce"],
+  "subcategories": {
+    "Sales": ["E-commerce Platforms"]
+  }
+}

@@ -39,7 +39,8 @@
       "dist/credentials/IkasApi.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/Ikas/Ikas.node.js"
+      "dist/nodes/Ikas/Ikas.node.js",
+      "dist/nodes/Ikas/IkasTrigger.node.js"
     ]
   },
   "devDependencies": {

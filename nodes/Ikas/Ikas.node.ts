@@ -22,6 +22,7 @@ import {
 	updateProduct,
 	uploadImage,
 } from './operations/products';
+import { createWebhook, deleteWebhooks, getManyWebhooks } from './operations/webhooks';
 
 export class Ikas implements INodeType {
 	description: INodeTypeDescription = {
@@ -180,6 +181,11 @@ export class Ikas implements INodeType {
 						fulfill: fulfillOrder,
 						updatePackageStatus: updateOrderPackageStatus,
 					},
+					webhook: {
+						getMany: getManyWebhooks,
+						create: createWebhook,
+						delete: deleteWebhooks,
+					},
 				};
 
 				// Get the handler for the current resource
@@ -228,6 +234,15 @@ export class Ikas implements INodeType {
 				} else if (resource === 'product' && operation === 'getMany') {
 					// For products with new pagination, responseData is already an array with _pagination
 					dataToReturn = Array.isArray(responseData) ? responseData : [responseData];
+				} else if (resource === 'webhook' && operation === 'getMany') {
+					// For webhooks, return the array directly
+					dataToReturn = Array.isArray(responseData) ? responseData : [responseData];
+				} else if (resource === 'webhook' && operation === 'create') {
+					// For webhook creation, return the created webhooks array
+					dataToReturn = Array.isArray(responseData) ? responseData : [responseData];
+				} else if (resource === 'webhook' && operation === 'delete') {
+					// For webhook deletion, return the deletion result
+					dataToReturn = [responseData || {}];
 				} else if (Array.isArray(responseData)) {
 					// For other arrays
 					dataToReturn = responseData;
