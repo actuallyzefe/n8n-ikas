@@ -110,7 +110,7 @@ export const productCreateUpdateProperties: INodeProperties[] = [
 		description: 'Type of the product (required by IKAS API)',
 		required: true,
 	},
-	// Product Structure
+	// Product Structure (only for create operation)
 	{
 		displayName: 'Product Structure',
 		name: 'productStructure',
@@ -118,21 +118,21 @@ export const productCreateUpdateProperties: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['product'],
-				operation: ['create', 'update'],
+				operation: ['create'],
 			},
 		},
 		options: [
 			{
 				name: 'Simple Product',
 				value: 'simple',
+				description: 'Simple product (no variants)',
 			},
 		],
 		default: 'simple',
-		description:
-			'Currently only simple products are supported. Variable products are under development.',
+		description: 'Choose the product structure type. For updates, this is automatically detected.',
 		required: true,
 	},
-	// Essential Price field for create (required for simple products)
+	// Product Structure - Automatically detected based on variant count for updates
 	{
 		displayName: 'Price',
 		name: 'price',
@@ -145,7 +145,7 @@ export const productCreateUpdateProperties: INodeProperties[] = [
 			},
 		},
 		default: 0,
-		description: 'Selling price for the simple product',
+		description: 'Selling price for the product (for simple products only)',
 		typeOptions: {
 			numberPrecision: 2,
 			minValue: 0,

@@ -16,13 +16,41 @@ export async function handleImageUpload(
 	}
 
 	try {
-		const variantId = responseData.variants?.[0]?.id;
-		if (!variantId) {
-			context.logger.warn('Could not upload image: missing variant ID');
-			return;
+		const productImage = additionalFields.productImage;
+		const imageTarget = productImage.imageTarget || 'product';
+		const targetVariantId = productImage.targetVariantId;
+
+		// Determine which variants to upload to
+		let variantIds: string[] = [];
+
+		if (imageTarget === 'variant') {
+			// Upload to specific variant
+			if (!targetVariantId || !targetVariantId.trim()) {
+				context.logger.warn(
+					'Target Variant ID is required when Image Target is "Specific Variant"',
+				);
+				return;
+			}
+
+			// Verify the variant exists
+			const targetVariant = responseData.variants?.find((v: any) => v.id === targetVariantId);
+			if (!targetVariant) {
+				context.logger.warn(`Variant with ID ${targetVariantId} not found in product`);
+				return;
+			}
+
+			variantIds = [targetVariantId];
+			context.logger.info(`Uploading image to specific variant: ${targetVariantId}`);
+		} else {
+			// Upload to all variants (product level)
+			variantIds = responseData.variants?.map((v: any) => v.id) || [];
+			if (variantIds.length === 0) {
+				context.logger.warn('Could not upload image: no variants found in product');
+				return;
+			}
+			context.logger.info(`Uploading image to all ${variantIds.length} variants`);
 		}
 
-		const productImage = additionalFields.productImage;
 		const imageSource = productImage.imageSource || 'url';
 		const imageOrder = productImage.imageOrder || 0;
 		const isMainImage = productImage.isMainImage !== false; // Default to true
@@ -51,7 +79,7 @@ export async function handleImageUpload(
 
 		const requestBody = {
 			productImage: {
-				variantIds: [variantId],
+				variantIds: variantIds,
 				...imageData,
 			},
 		};
@@ -78,6 +106,9 @@ export async function handleImageUpload(
 			imageSource: imageSource,
 			imageOrder: imageOrder,
 			isMainImage: isMainImage,
+			imageTarget: imageTarget,
+			targetVariantIds: variantIds,
+			variantsUpdated: variantIds.length,
 		});
 	} catch (imageError) {
 		context.logger.error(JSON.stringify(imageError, null, 2), {
