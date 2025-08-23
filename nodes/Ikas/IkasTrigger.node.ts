@@ -37,7 +37,7 @@ export class IkasTrigger implements INodeType {
 				name: 'default',
 				httpMethod: 'POST',
 				responseMode: 'onReceived',
-				path: 'webhook',
+				path: 'webhook-test',
 			},
 		],
 		properties: [
@@ -135,18 +135,8 @@ export class IkasTrigger implements INodeType {
 					endpoint: webhookUrl,
 				};
 
-				this.logger.info(JSON.stringify(body, null, 2), {
-					message: 'Webhook input in trigger node',
-				});
-
 				try {
-					const response = await ikasGraphQLRequest.call(this, SaveWebhookMutation, {
-						input: body,
-					});
-
-					this.logger.info(JSON.stringify(response, null, 2), {
-						message: 'Webhook response in trigger node',
-					});
+					await ikasGraphQLRequest.call(this, SaveWebhookMutation, { input: body });
 					return true;
 				} catch {
 					return false;
@@ -185,13 +175,40 @@ export class IkasTrigger implements INodeType {
 		const returnData: INodeExecutionData[] = [];
 
 		if (bodyData) {
+			// Parse the data field if it's a JSON string
+			let parsedData = bodyData;
+			if (bodyData.data && typeof bodyData.data === 'string') {
+				try {
+					parsedData = {
+						...bodyData,
+						data: JSON.parse(bodyData.data),
+					};
+				} catch (error) {
+					// If parsing fails, keep original data
+					this.logger.error(error as string, {
+						message: 'Error parsing webhook data',
+					});
+					parsedData = bodyData;
+				}
+			}
+
+			// Flatten the structure for better usability
+			const flattenedData = {
+				event,
+				timestamp: new Date().toISOString(),
+				scope: parsedData.scope,
+				merchantId: parsedData.merchantId,
+				headers: headers,
+				_rawData: parsedData, // Keep original data for reference
+			};
+
+			// Safely spread the parsed data fields to top level
+			if (parsedData.data && typeof parsedData.data === 'object' && parsedData.data !== null) {
+				Object.assign(flattenedData, parsedData.data);
+			}
+
 			returnData.push({
-				json: {
-					event,
-					timestamp: new Date().toISOString(),
-					data: bodyData,
-					headers: headers,
-				},
+				json: flattenedData,
 			});
 		}
 

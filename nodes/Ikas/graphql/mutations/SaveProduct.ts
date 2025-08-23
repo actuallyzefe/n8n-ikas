@@ -58,6 +58,7 @@ export const SaveProductMutation = `mutation SaveProduct($input: ProductInput!) 
         imageIds
       }
       images {
+        imageId
         fileName
         order
         isMain
