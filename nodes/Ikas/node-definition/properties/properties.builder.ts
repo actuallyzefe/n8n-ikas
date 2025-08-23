@@ -12,6 +12,9 @@ import {
 	productSearchProperties,
 	productUploadImageProperties,
 	resourceProperty,
+	webhookCreateProperties,
+	webhookDeleteProperties,
+	webhookOperationProperty,
 } from './index';
 
 /**
@@ -26,6 +29,7 @@ export function buildNodeProperties(): INodeProperties[] {
 		// Operations
 		productOperationProperty,
 		orderOperationProperty,
+		webhookOperationProperty,
 
 		// Pagination properties for getMany operations
 		...createPaginationProperties('product', 'getMany'),
@@ -45,6 +49,10 @@ export function buildNodeProperties(): INodeProperties[] {
 		productAdditionalFieldsProperty,
 		...productDeleteProperties,
 		...productUploadImageProperties,
+
+		// Webhook-specific properties
+		...webhookCreateProperties,
+		...webhookDeleteProperties,
 	];
 }
 
@@ -55,7 +63,11 @@ export function buildNodeProperties(): INodeProperties[] {
 export function buildNodePropertiesGrouped(): INodeProperties[] {
 	const baseProperties: INodeProperties[] = [resourceProperty];
 
-	const operationProperties: INodeProperties[] = [productOperationProperty, orderOperationProperty];
+	const operationProperties: INodeProperties[] = [
+		productOperationProperty,
+		orderOperationProperty,
+		webhookOperationProperty,
+	];
 
 	const orderProperties: INodeProperties[] = [
 		orderFiltersProperty,
@@ -71,5 +83,16 @@ export function buildNodePropertiesGrouped(): INodeProperties[] {
 		...productUploadImageProperties,
 	];
 
-	return [...baseProperties, ...operationProperties, ...orderProperties, ...productProperties];
+	const webhookProperties: INodeProperties[] = [
+		...webhookCreateProperties,
+		...webhookDeleteProperties,
+	];
+
+	return [
+		...baseProperties,
+		...operationProperties,
+		...orderProperties,
+		...productProperties,
+		...webhookProperties,
+	];
 }

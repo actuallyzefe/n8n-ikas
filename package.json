@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-ikas",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "n8n community node for Ikas e-commerce platform integration",
   "keywords": [
     "n8n-community-node-package",
@@ -39,7 +39,8 @@
       "dist/credentials/IkasApi.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/Ikas/Ikas.node.js"
+      "dist/nodes/Ikas/Ikas.node.js",
+      "dist/nodes/Ikas/IkasTrigger.node.js"
     ]
   },
   "devDependencies": {

@@ -19,5 +19,12 @@ export {
 	orderPackageStatusProperties,
 } from './order';
 
+// Webhook properties
+export {
+	webhookCreateProperties,
+	webhookDeleteProperties,
+	webhookOperationProperty,
+} from './webhook';
+
 // Property builder utilities
 export { buildNodeProperties, buildNodePropertiesGrouped } from './properties.builder';

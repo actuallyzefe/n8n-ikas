@@ -7,14 +7,19 @@ export const resourceProperty: INodeProperties = {
 	noDataExpression: true,
 	options: [
 		{
+			name: 'Order',
+			value: 'order',
+			description: 'Work with orders in your IKAS store',
+		},
+		{
 			name: 'Product',
 			value: 'product',
 			description: 'Work with products in your IKAS store',
 		},
 		{
-			name: 'Order',
-			value: 'order',
-			description: 'Work with orders in your IKAS store',
+			name: 'Webhook',
+			value: 'webhook',
+			description: 'Manage webhooks for your IKAS store',
 		},
 	],
 	default: 'product',
