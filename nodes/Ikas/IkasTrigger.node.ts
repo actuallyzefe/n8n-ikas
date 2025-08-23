@@ -135,11 +135,18 @@ export class IkasTrigger implements INodeType {
 					endpoint: webhookUrl,
 				};
 
+				this.logger.info(JSON.stringify(body, null, 2), {
+					message: 'Webhook input in trigger node',
+				});
+
 				try {
 					const response = await ikasGraphQLRequest.call(this, SaveWebhookMutation, {
 						input: body,
 					});
-					this.logger.info(JSON.stringify(response, null, 2));
+
+					this.logger.info(JSON.stringify(response, null, 2), {
+						message: 'Webhook response in trigger node',
+					});
 					return true;
 				} catch {
 					return false;
