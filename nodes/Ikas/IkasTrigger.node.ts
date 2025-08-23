@@ -185,6 +185,9 @@ export class IkasTrigger implements INodeType {
 					};
 				} catch (error) {
 					// If parsing fails, keep original data
+					this.logger.error(error as string, {
+						message: 'Error parsing webhook data',
+					});
 					parsedData = bodyData;
 				}
 			}
