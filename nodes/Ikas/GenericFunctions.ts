@@ -1,4 +1,5 @@
 import type {
+	ICredentialDataDecryptedObject,
 	IDataObject,
 	IExecuteFunctions,
 	IHookFunctions,
@@ -7,6 +8,33 @@ import type {
 	ILoadOptionsFunctions,
 } from 'n8n-workflow';
 
+/**
+ * Helper function to get a fresh access token for each request
+ */
+async function getFreshToken(
+	context: IExecuteFunctions | ILoadOptionsFunctions | IHookFunctions,
+): Promise<string> {
+	context.logger.info('Getting fresh token');
+	const credentials = (await context.getCredentials('ikasApi')) as ICredentialDataDecryptedObject;
+
+	const tokenUrl = `https://${credentials.storeName}.myikas.com/api/admin/oauth/token`;
+
+	const response = await context.helpers.httpRequest({
+		method: 'POST',
+		url: tokenUrl,
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded',
+		},
+		body: {
+			grant_type: 'client_credentials',
+			client_id: credentials.clientId,
+			client_secret: credentials.clientSecret,
+		},
+	});
+
+	return (response as { access_token: string }).access_token;
+}
+
 export async function ikasApiRequest(
 	this: IExecuteFunctions | ILoadOptionsFunctions | IHookFunctions,
 	method: IHttpRequestMethods,
@@ -14,7 +42,8 @@ export async function ikasApiRequest(
 	body: IDataObject = {},
 	query: IDataObject = {},
 ) {
-	const credentialsType = 'ikasApi';
+	/* Get a fresh token for each request since the token expires after 4 hours */
+	const accessToken = await getFreshToken(this);
 
 	const options: IHttpRequestOptions = {
 		method,
@@ -22,6 +51,7 @@ export async function ikasApiRequest(
 		json: true,
 		headers: {
 			'Content-Type': 'application/json',
+			Authorization: `Bearer ${accessToken}`,
 		},
 		body,
 		qs: query,
@@ -31,7 +61,7 @@ export async function ikasApiRequest(
 		delete options.body;
 	}
 
-	return await this.helpers.requestWithAuthentication.call(this, credentialsType, options);
+	return await this.helpers.httpRequest.call(this, options);
 }
 
 export async function ikasGraphQLRequest(
