@@ -21,6 +21,11 @@ export const resourceProperty: INodeProperties = {
 			value: 'webhook',
 			description: 'Manage webhooks for your IKAS store',
 		},
+		{
+			name: 'Customer',
+			value: 'customer',
+			description: 'Work with customers in your IKAS store',
+		},
 	],
 	default: 'product',
 };

@@ -1,0 +1,110 @@
+import type { INodeProperties } from 'n8n-workflow';
+
+export const customerFiltersProperty: INodeProperties = {
+	displayName: 'Additional Filters',
+	name: 'additionalFilters',
+	type: 'collection',
+	placeholder: 'Add Filter',
+	default: {},
+	displayOptions: {
+		show: {
+			resource: ['customer'],
+			operation: ['getMany'],
+		},
+	},
+	options: [
+		{
+			displayName: 'Account Status',
+			name: 'accountStatus',
+			type: 'multiOptions',
+			default: [],
+			description: 'Filter customers by account status',
+			options: [
+				{ name: 'Active Account', value: 'ACTIVE_ACCOUNT' },
+				{ name: 'Declined Account Invitation', value: 'DECLINED_ACCOUNT_INVITATION' },
+				{ name: 'Disabled Account', value: 'DISABLED_ACCOUNT' },
+				{ name: 'Invited to Create Account', value: 'INVITED_TO_CREATE_ACCOUNT' },
+			],
+		},
+		{
+			displayName: 'Customer ID',
+			name: 'id',
+			type: 'string',
+			default: '',
+			description: 'Filter by customer ID',
+		},
+		{
+			displayName: 'Email',
+			name: 'email',
+			type: 'string',
+			default: '',
+			placeholder: 'name@email.com',
+			description: 'Filter by customer email address',
+		},
+		{
+			displayName: 'Email Subscription Status',
+			name: 'subscriptionStatus',
+			type: 'multiOptions',
+			default: [],
+			description: 'Filter customers by email subscription status',
+			options: [
+				{ name: 'Subscribed', value: 'SUBSCRIBED' },
+				{ name: 'Not Subscribed', value: 'NOT_SUBSCRIBED' },
+				{ name: 'Pending Confirmation', value: 'PENDING_CONFIRMATION' },
+			],
+		},
+		{
+			displayName: 'Phone Number',
+			name: 'phone',
+			type: 'string',
+			default: '',
+			description: 'Filter by customer phone number',
+		},
+		{
+			displayName: 'Registration Source',
+			name: 'registrationSource',
+			type: 'multiOptions',
+			default: [],
+			description: 'Filter customers by registration source',
+			options: [
+				{ name: 'Apple', value: 'apple' },
+				{ name: 'Credentials', value: 'credentials' },
+				{ name: 'Facebook', value: 'facebook' },
+				{ name: 'Google', value: 'google' },
+				{ name: 'Twitch', value: 'twitch' },
+			],
+		},
+		{
+			displayName: 'Search',
+			name: 'search',
+			type: 'string',
+			default: '',
+			description: 'Search across firstName, lastName, email, and phone fields',
+		},
+		{
+			displayName: 'Sort',
+			name: 'sort',
+			type: 'options',
+			default: 'updatedAt',
+			description: 'Sort customers by field',
+			options: [
+				{ name: 'Updated At (Ascending)', value: 'updatedAt' },
+				{ name: 'Updated At (Descending)', value: '-updatedAt' },
+			],
+		},
+		{
+			displayName: 'Updated At (From)',
+			name: 'updatedAtFrom',
+			type: 'dateTime',
+			default: '',
+			description: 'Filter customers updated after this date',
+		},
+		{
+			displayName: 'Updated At (To)',
+			name: 'updatedAtTo',
+			type: 'dateTime',
+			default: '',
+			description: 'Filter customers updated before this date',
+		},
+	],
+};

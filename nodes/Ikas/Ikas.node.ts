@@ -1,4 +1,5 @@
 import type {
+	IDataObject,
 	IExecuteFunctions,
 	ILoadOptionsFunctions,
 	INodeExecutionData,
@@ -22,6 +23,13 @@ import {
 	updateProduct,
 	uploadImage,
 } from './operations/products';
+import {
+	createCustomer,
+	updateCustomer,
+	getManyCustomers,
+	searchCustomers,
+} from './operations/customers';
+import { SalesChannel } from './types/sales-channel.types';
 import { createWebhook, deleteWebhooks, getManyWebhooks } from './operations/webhooks';
 
 export class Ikas implements INodeType {
@@ -68,7 +76,7 @@ export class Ikas implements INodeType {
 						message: 'Sales channels are here',
 					});
 
-					return salesChannels.map((channel: any) => ({
+					return salesChannels.map((channel: SalesChannel) => ({
 						name: `${channel.name}`,
 						value: channel.id,
 					}));
@@ -92,7 +100,7 @@ export class Ikas implements INodeType {
 						message: 'Stock locations are here',
 					});
 
-					return stockLocations.map((location: any) => ({
+					return stockLocations.map((location: SalesChannel) => ({
 						name: `${location.name}`,
 						value: location.id,
 					}));
@@ -168,6 +176,12 @@ export class Ikas implements INodeType {
 			try {
 				// Define operation handlers for each resource
 				const resourceHandlers = {
+					customer: {
+						getMany: getManyCustomers,
+						search: searchCustomers,
+						create: createCustomer,
+						update: updateCustomer,
+					},
 					product: {
 						getMany: getManyProducts,
 						search: searchProducts,
@@ -214,17 +228,52 @@ export class Ikas implements INodeType {
 				const responseData = await operationHandler.call(this, i);
 
 				// Handle different response structures
-				let dataToReturn: any[] = [];
+				let dataToReturn: IDataObject[] = [];
 
-				if (resource === 'order' && operation === 'getMany') {
-					// For orders with new pagination, responseData is already an array with _pagination
-					dataToReturn = Array.isArray(responseData) ? responseData : [responseData];
+				if (resource === 'customer' && operation === 'getMany') {
+					// For customers, extract the data array and include pagination info
+					const customers = (responseData.data as IDataObject[]) || [];
+					const paging = {
+						page: responseData.page,
+						limit: responseData.limit,
+						count: responseData.count,
+					};
+
+					dataToReturn = customers.map((customer: IDataObject) => ({
+						...customer,
+						_pagination: paging,
+					}));
+				} else if (resource === 'customer' && (operation === 'create' || operation === 'update')) {
+					// For create/update customer, return the customer object
+					dataToReturn = [(responseData || {}) as IDataObject];
+				} else if (resource === 'customer' && operation === 'search') {
+					// For customer search (listCustomer with filters)
+					const customers = (responseData.results as IDataObject[]) || [];
+					const paging = (responseData.paging as IDataObject) || {};
+
+					dataToReturn = customers.map((customer: IDataObject) => ({
+						...customer,
+						_pagination: paging,
+					}));
+				} else if (resource === 'order' && operation === 'getMany') {
+					// For orders, extract the data array and include pagination info
+					const orders = (responseData.data as IDataObject[]) || [];
+					const paging = {
+						page: responseData.page,
+						limit: responseData.limit,
+						count: responseData.count,
+					};
+
+					dataToReturn = orders.map((order: IDataObject) => ({
+						...order,
+						_pagination: paging,
+					}));
 				} else if (resource === 'order' && operation === 'fulfill') {
 					// For fulfill order, return the updated order
-					dataToReturn = [responseData || {}];
+					dataToReturn = [(responseData || {}) as IDataObject];
 				} else if (resource === 'order' && operation === 'updatePackageStatus') {
 					// For update package status, return the updated order
-					dataToReturn = [responseData || {}];
+					dataToReturn = [(responseData || {}) as IDataObject];
 				} else if (resource === 'product' && operation === 'delete') {
 					// For delete products, return the deletion result
 					dataToReturn = [responseData || {}];
@@ -248,7 +297,7 @@ export class Ikas implements INodeType {
 					dataToReturn = responseData;
 				} else {
 					// For single objects (like create/update operations)
-					dataToReturn = [responseData || {}];
+					dataToReturn = [(responseData || {}) as IDataObject];
 				}
 
 				const executionData = this.helpers.constructExecutionMetaData(
