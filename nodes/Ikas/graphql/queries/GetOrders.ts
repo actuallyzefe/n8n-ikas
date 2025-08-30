@@ -1,5 +1,5 @@
 export const GetOrdersQuery = `
-	query ListOrders($status: OrderStatusEnumInputFilter, $orderPaymentStatus: OrderPaymentStatusEnumInputFilter, $orderPackageStatus: OrderPackageStatusEnumInputFilter, $customerId: StringFilterInput, $customerEmail: StringFilterInput, $orderNumber: StringFilterInput, $salesChannelId: StringFilterInput) {
+	query ListOrders($status: OrderStatusEnumInputFilter, $orderPaymentStatus: OrderPaymentStatusEnumInputFilter, $orderPackageStatus: OrderPackageStatusEnumInputFilter, $customerId: StringFilterInput, $customerEmail: StringFilterInput, $orderNumber: StringFilterInput, $salesChannelId: StringFilterInput, $pagination: PaginationInput) {
 		listOrder(
 			status: $status
 			orderPaymentStatus: $orderPaymentStatus
@@ -8,6 +8,7 @@ export const GetOrdersQuery = `
 			customerEmail: $customerEmail
 			orderNumber: $orderNumber
 			salesChannelId: $salesChannelId
+			pagination: $pagination
 		) {
 			data {
 				id

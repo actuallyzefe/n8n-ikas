@@ -5,6 +5,7 @@ import {
 	customerCreateUpdateProperties,
 	customerFiltersProperty,
 	customerSearchProperties,
+	createPaginationProperties,
 	orderFiltersProperty,
 	orderFulfillProperties,
 	orderOperationProperty,
@@ -15,6 +16,9 @@ import {
 	productOperationProperty,
 	productSearchProperties,
 	productUploadImageProperties,
+	webhookCreateProperties,
+	webhookDeleteProperties,
+	webhookOperationProperty,
 } from './index';
 
 /**
@@ -33,6 +37,15 @@ export function buildNodeProperties(): INodeProperties[] {
 		...customerCreateUpdateProperties,
 		customerFiltersProperty,
 		...customerSearchProperties,
+		webhookOperationProperty,
+
+		// Pagination properties for getMany operations
+		...createPaginationProperties('product', 'getMany'),
+		...createPaginationProperties('order', 'getMany'),
+
+		// Pagination properties for search operations
+		...createPaginationProperties('product', 'search'),
+
 		// Order-specific properties
 		orderFiltersProperty,
 		...orderFulfillProperties,
@@ -43,6 +56,10 @@ export function buildNodeProperties(): INodeProperties[] {
 		productAdditionalFieldsProperty,
 		...productDeleteProperties,
 		...productUploadImageProperties,
+
+		// Webhook-specific properties
+		...webhookCreateProperties,
+		...webhookDeleteProperties,
 	];
 }
 
@@ -52,25 +69,19 @@ export function buildNodeProperties(): INodeProperties[] {
  */
 export function buildNodePropertiesGrouped(): INodeProperties[] {
 	const baseProperties: INodeProperties[] = [resourceProperty];
-	
+
 	const operationProperties: INodeProperties[] = [
-		customerOperationProperty,
 		productOperationProperty,
 		orderOperationProperty,
+		webhookOperationProperty,
 	];
-	
-	const customerProperties: INodeProperties[] = [
-		...customerCreateUpdateProperties,
-		customerFiltersProperty,
-		...customerSearchProperties,
-	];
-	
+
 	const orderProperties: INodeProperties[] = [
 		orderFiltersProperty,
 		...orderFulfillProperties,
 		...orderPackageStatusProperties,
 	];
-	
+
 	const productProperties: INodeProperties[] = [
 		...productSearchProperties,
 		...productCreateUpdateProperties,
@@ -78,12 +89,17 @@ export function buildNodePropertiesGrouped(): INodeProperties[] {
 		...productDeleteProperties,
 		...productUploadImageProperties,
 	];
-	
+
+	const webhookProperties: INodeProperties[] = [
+		...webhookCreateProperties,
+		...webhookDeleteProperties,
+	];
+
 	return [
 		...baseProperties,
 		...operationProperties,
-		...customerProperties,
 		...orderProperties,
 		...productProperties,
+		...webhookProperties,
 	];
 }

@@ -37,7 +37,7 @@ export const productAdditionalFieldsProperty: INodeProperties = {
 			},
 		},
 		{
-			displayName: 'Price (for Updates)',
+			displayName: 'Price',
 			name: 'price',
 			type: 'number',
 			displayOptions: {
@@ -64,9 +64,16 @@ export const productAdditionalFieldsProperty: INodeProperties = {
 			description: 'SKU for the simple product',
 		},
 		{
+			displayName: 'Barcode List',
+			name: 'barcodeList',
+			type: 'string',
+			default: '',
+			description: 'Comma-separated list of barcodes for the product (e.g., "123456789,987654321")',
+		},
+		{
 			displayName: 'Variant ID',
 			name: 'variantId',
-			type: 'string',
+			type: 'options',
 			displayOptions: {
 				show: {
 					'@version': [1, 2, 3, 4, 5], // Always show for collection items
@@ -75,8 +82,12 @@ export const productAdditionalFieldsProperty: INodeProperties = {
 					'/operation': ['create'], // Hide for create operation
 				},
 			},
+			typeOptions: {
+				loadOptionsMethod: 'getProductVariants',
+			},
 			default: '',
-			description: 'ID of the variant to update (required for updating pricing/SKU)',
+			description:
+				'Select the variant to update. REQUIRED for products with multiple variants (variable products). For simple products (single variant), leave empty to update the only variant.',
 		},
 		// Stock management
 		{
@@ -231,8 +242,45 @@ export const productAdditionalFieldsProperty: INodeProperties = {
 				},
 			},
 			default: {},
-			description: 'Upload an image for this product',
+			description: 'Upload an image for this product or specific variant',
 			options: [
+				// Image target selection
+				{
+					displayName: 'Image Target',
+					name: 'imageTarget',
+					type: 'options',
+					options: [
+						{
+							name: 'Product (All Variants)',
+							value: 'product',
+							description: 'Add image to all variants of the product',
+						},
+						{
+							name: 'Specific Variant',
+							value: 'variant',
+							description: 'Add image to a specific variant only',
+						},
+					],
+					default: 'product',
+					description: 'Choose whether to add image to all variants or a specific variant',
+				},
+				// Variant selection (shown only when imageTarget is 'variant')
+				{
+					displayName: 'Target Variant ID',
+					name: 'targetVariantId',
+					type: 'options',
+					displayOptions: {
+						show: {
+							imageTarget: ['variant'],
+						},
+					},
+					typeOptions: {
+						loadOptionsMethod: 'getProductVariants',
+					},
+					default: '',
+					description:
+						'Select the specific variant to add the image to (required when Image Target is "Specific Variant")',
+				},
 				{
 					displayName: 'Image Source',
 					name: 'imageSource',
