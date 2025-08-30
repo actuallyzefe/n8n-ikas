@@ -1,6 +1,6 @@
 export const GetProductsQuery = `
-							query GetProducts {
-								listProduct {
+							query GetProducts($pagination: PaginationInput) {
+								listProduct(pagination: $pagination) {
 									data {
 										id
 										name
@@ -25,6 +25,9 @@ export const GetProductsQuery = `
 											name
 										}
 									}
+									page
+									limit
+									count
 								}
 							}
 							`;

@@ -23,7 +23,14 @@ import {
 	updateProduct,
 	uploadImage,
 } from './operations/products';
-import { createCustomer, updateCustomer, getManyCustomers, searchCustomers } from './operations/customers';
+import {
+	createCustomer,
+	updateCustomer,
+	getManyCustomers,
+	searchCustomers,
+} from './operations/customers';
+import { SalesChannel } from './types/sales-channel.types';
+import { createWebhook, deleteWebhooks, getManyWebhooks } from './operations/webhooks';
 
 export class Ikas implements INodeType {
 	description: INodeTypeDescription = {
@@ -69,7 +76,7 @@ export class Ikas implements INodeType {
 						message: 'Sales channels are here',
 					});
 
-					return salesChannels.map((channel: { id: string; name: string }) => ({
+					return salesChannels.map((channel: SalesChannel) => ({
 						name: `${channel.name}`,
 						value: channel.id,
 					}));
@@ -93,7 +100,7 @@ export class Ikas implements INodeType {
 						message: 'Stock locations are here',
 					});
 
-					return stockLocations.map((location: { id: string; name: string }) => ({
+					return stockLocations.map((location: SalesChannel) => ({
 						name: `${location.name}`,
 						value: location.id,
 					}));
@@ -188,6 +195,11 @@ export class Ikas implements INodeType {
 						fulfill: fulfillOrder,
 						updatePackageStatus: updateOrderPackageStatus,
 					},
+					webhook: {
+						getMany: getManyWebhooks,
+						create: createWebhook,
+						delete: deleteWebhooks,
+					},
 				};
 
 				// Get the handler for the current resource
@@ -233,7 +245,7 @@ export class Ikas implements INodeType {
 					}));
 				} else if (resource === 'customer' && (operation === 'create' || operation === 'update')) {
 					// For create/update customer, return the customer object
-					dataToReturn = [((responseData || {}) as IDataObject)];
+					dataToReturn = [(responseData || {}) as IDataObject];
 				} else if (resource === 'customer' && operation === 'search') {
 					// For customer search (listCustomer with filters)
 					const customers = (responseData.results as IDataObject[]) || [];
@@ -258,28 +270,34 @@ export class Ikas implements INodeType {
 					}));
 				} else if (resource === 'order' && operation === 'fulfill') {
 					// For fulfill order, return the updated order
-					dataToReturn = [((responseData || {}) as IDataObject)];
+					dataToReturn = [(responseData || {}) as IDataObject];
 				} else if (resource === 'order' && operation === 'updatePackageStatus') {
 					// For update package status, return the updated order
-					dataToReturn = [((responseData || {}) as IDataObject)];
+					dataToReturn = [(responseData || {}) as IDataObject];
 				} else if (resource === 'product' && operation === 'delete') {
 					// For delete products, return the deletion result
 					dataToReturn = [responseData || {}];
 				} else if (resource === 'product' && operation === 'search') {
-					// For product search, handle the search response structure
-					const products = (responseData.results as IDataObject[]) || [];
-					const paging = (responseData.paging as IDataObject) || {};
-
-					dataToReturn = products.map((product: IDataObject) => ({
-						...product,
-						_pagination: paging,
-					}));
+					// For product search with new pagination, responseData is already an array with _pagination
+					dataToReturn = Array.isArray(responseData) ? responseData : [responseData];
+				} else if (resource === 'product' && operation === 'getMany') {
+					// For products with new pagination, responseData is already an array with _pagination
+					dataToReturn = Array.isArray(responseData) ? responseData : [responseData];
+				} else if (resource === 'webhook' && operation === 'getMany') {
+					// For webhooks, return the array directly
+					dataToReturn = Array.isArray(responseData) ? responseData : [responseData];
+				} else if (resource === 'webhook' && operation === 'create') {
+					// For webhook creation, return the created webhooks array
+					dataToReturn = Array.isArray(responseData) ? responseData : [responseData];
+				} else if (resource === 'webhook' && operation === 'delete') {
+					// For webhook deletion, return the deletion result
+					dataToReturn = [responseData || {}];
 				} else if (Array.isArray(responseData)) {
-					// For arrays (like getMany products)
-					dataToReturn = responseData as IDataObject[];
+					// For other arrays
+					dataToReturn = responseData;
 				} else {
 					// For single objects (like create/update operations)
-					dataToReturn = [((responseData || {}) as IDataObject)];
+					dataToReturn = [(responseData || {}) as IDataObject];
 				}
 
 				const executionData = this.helpers.constructExecutionMetaData(

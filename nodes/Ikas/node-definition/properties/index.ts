@@ -1,5 +1,5 @@
 // Base properties
-export { resourceProperty } from './base.properties';
+export { createPaginationProperties, resourceProperty } from './base.properties';
 
 // Customer properties
 export {
@@ -26,6 +26,13 @@ export {
 	orderOperationProperty,
 	orderPackageStatusProperties,
 } from './order';
+
+// Webhook properties
+export {
+	webhookCreateProperties,
+	webhookDeleteProperties,
+	webhookOperationProperty,
+} from './webhook';
 
 // Property builder utilities
 export { buildNodeProperties, buildNodePropertiesGrouped } from './properties.builder';

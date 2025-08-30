@@ -1,7 +1,7 @@
 import type { IExecuteFunctions } from 'n8n-workflow';
 
-import { ikasGraphQLRequest } from '../../GenericFunctions';
 import { GetOrdersQuery } from '../../graphql/queries/GetOrders';
+import { executeWithPagination } from '../../utils/pagination.utils';
 
 /**
  * Builds order filter variables from additional filters
@@ -60,16 +60,31 @@ function buildOrderFilterVariables(context: IExecuteFunctions, itemIndex: number
 
 export async function getManyOrders(this: IExecuteFunctions, itemIndex: number): Promise<any> {
 	// Build order filter variables
-	const orderVariables = buildOrderFilterVariables(this, itemIndex);
+	const orderFilterVariables = buildOrderFilterVariables(this, itemIndex);
 
-	// Execute query
-	const response = await ikasGraphQLRequest.call(this, GetOrdersQuery, orderVariables);
+	const result = await executeWithPagination(
+		this,
+		itemIndex,
+		GetOrdersQuery,
+		orderFilterVariables, // Pass filter variables as base variables
+		(response) => ({
+			data: response.data?.listOrder?.data || [],
+			pagination: {
+				page: response.data?.listOrder?.page || 1,
+				limit: response.data?.listOrder?.limit || 50,
+				count: response.data?.listOrder?.count || 0,
+			},
+		}),
+	);
 
-	const responseData = response.data?.listOrder || {};
-
-	this.logger.info(JSON.stringify(responseData, null, 2), {
-		message: 'Orders are here',
+	this.logger.info(`Fetched ${result.data.length} orders with pagination`, {
+		message: 'Orders fetched with pagination',
+		pagination: result.pagination,
 	});
 
-	return responseData;
+	// Return the data with pagination metadata attached to each item
+	return result.data.map((order: any) => ({
+		...order,
+		_pagination: result.pagination,
+	}));
 }

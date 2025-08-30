@@ -60,6 +60,7 @@ export const GetProductByIdQuery = `
             imageIds
           }
           images {
+            imageId
             fileName
             order
             isMain
