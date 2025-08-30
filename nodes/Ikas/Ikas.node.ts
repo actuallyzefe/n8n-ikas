@@ -23,7 +23,13 @@ import {
 	updateProduct,
 	uploadImage,
 } from './operations/products';
-import { createCustomer, updateCustomer, getManyCustomers, searchCustomers } from './operations/customers';
+import {
+	createCustomer,
+	updateCustomer,
+	getManyCustomers,
+	searchCustomers,
+} from './operations/customers';
+import { SalesChannel } from './types/sales-channel.types';
 
 export class Ikas implements INodeType {
 	description: INodeTypeDescription = {
@@ -69,7 +75,7 @@ export class Ikas implements INodeType {
 						message: 'Sales channels are here',
 					});
 
-					return salesChannels.map((channel: { id: string; name: string }) => ({
+					return salesChannels.map((channel: SalesChannel) => ({
 						name: `${channel.name}`,
 						value: channel.id,
 					}));
@@ -93,7 +99,7 @@ export class Ikas implements INodeType {
 						message: 'Stock locations are here',
 					});
 
-					return stockLocations.map((location: { id: string; name: string }) => ({
+					return stockLocations.map((location: SalesChannel) => ({
 						name: `${location.name}`,
 						value: location.id,
 					}));
@@ -233,7 +239,7 @@ export class Ikas implements INodeType {
 					}));
 				} else if (resource === 'customer' && (operation === 'create' || operation === 'update')) {
 					// For create/update customer, return the customer object
-					dataToReturn = [((responseData || {}) as IDataObject)];
+					dataToReturn = [(responseData || {}) as IDataObject];
 				} else if (resource === 'customer' && operation === 'search') {
 					// For customer search (listCustomer with filters)
 					const customers = (responseData.results as IDataObject[]) || [];
@@ -258,10 +264,10 @@ export class Ikas implements INodeType {
 					}));
 				} else if (resource === 'order' && operation === 'fulfill') {
 					// For fulfill order, return the updated order
-					dataToReturn = [((responseData || {}) as IDataObject)];
+					dataToReturn = [(responseData || {}) as IDataObject];
 				} else if (resource === 'order' && operation === 'updatePackageStatus') {
 					// For update package status, return the updated order
-					dataToReturn = [((responseData || {}) as IDataObject)];
+					dataToReturn = [(responseData || {}) as IDataObject];
 				} else if (resource === 'product' && operation === 'delete') {
 					// For delete products, return the deletion result
 					dataToReturn = [responseData || {}];
@@ -279,7 +285,7 @@ export class Ikas implements INodeType {
 					dataToReturn = responseData as IDataObject[];
 				} else {
 					// For single objects (like create/update operations)
-					dataToReturn = [((responseData || {}) as IDataObject)];
+					dataToReturn = [(responseData || {}) as IDataObject];
 				}
 
 				const executionData = this.helpers.constructExecutionMetaData(
