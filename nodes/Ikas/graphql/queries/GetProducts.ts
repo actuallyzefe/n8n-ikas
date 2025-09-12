@@ -10,6 +10,15 @@ export const GetProductsQuery = `
 										variants {
 											id
 											sku
+											prices {
+												buyPrice
+												currency
+												currencyCode
+												currencySymbol
+												discountPrice
+												priceListId
+												sellPrice
+											}
 											barcodeList
 											variantValueIds {
 												variantTypeId
