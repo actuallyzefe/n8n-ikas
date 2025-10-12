@@ -35,6 +35,16 @@ export const orderFiltersProperty: INodeProperties = {
 			description: 'Filter by order number',
 		},
 		{
+			displayName: 'Sales Channel',
+			name: 'salesChannelId',
+			type: 'options',
+			typeOptions: {
+				loadOptionsMethod: 'getSalesChannels',
+			},
+			default: '',
+			description: 'Filter by sales channel',
+		},
+		{
 			displayName: 'Order Status',
 			name: 'status',
 			type: 'multiOptions',
