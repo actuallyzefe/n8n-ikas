@@ -55,6 +55,13 @@ function buildOrderFilterVariables(context: IExecuteFunctions, itemIndex: number
 		};
 	}
 
+	// Sales channel filter - using proper filter format
+	if (additionalFilters.salesChannelId) {
+		orderVariables.salesChannelId = {
+			eq: additionalFilters.salesChannelId,
+		};
+	}
+
 	return orderVariables;
 }
 
