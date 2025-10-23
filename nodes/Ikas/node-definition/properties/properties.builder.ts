@@ -1,5 +1,10 @@
 import type { INodeProperties } from 'n8n-workflow';
 import {
+	resourceProperty,
+	customerOperationProperty,
+	customerCreateUpdateProperties,
+	customerFiltersProperty,
+	customerSearchProperties,
 	createPaginationProperties,
 	orderFiltersProperty,
 	orderFulfillProperties,
@@ -11,7 +16,6 @@ import {
 	productOperationProperty,
 	productSearchProperties,
 	productUploadImageProperties,
-	resourceProperty,
 	webhookCreateProperties,
 	webhookDeleteProperties,
 	webhookOperationProperty,
@@ -25,10 +29,14 @@ export function buildNodeProperties(): INodeProperties[] {
 	return [
 		// Base resource selection
 		resourceProperty,
-
 		// Operations
+		customerOperationProperty,
 		productOperationProperty,
 		orderOperationProperty,
+		// Customer-specific properties
+		...customerCreateUpdateProperties,
+		customerFiltersProperty,
+		...customerSearchProperties,
 		webhookOperationProperty,
 
 		// Pagination properties for getMany operations
@@ -42,7 +50,6 @@ export function buildNodeProperties(): INodeProperties[] {
 		orderFiltersProperty,
 		...orderFulfillProperties,
 		...orderPackageStatusProperties,
-
 		// Product-specific properties
 		...productSearchProperties,
 		...productCreateUpdateProperties,
